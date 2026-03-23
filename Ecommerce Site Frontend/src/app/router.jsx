@@ -23,6 +23,10 @@ import AdminCategories from "./admin/pages/AdminCategories";
 import AdminOrders from "./admin/pages/AdminOrders";
 import AdminCoupons from "./admin/pages/AdminCoupons";
 import AiStylist from "./pages/AiStylist";
+import Register from "./pages/Register";
+import Login from "./pages/Login";
+import Profile from "./pages/Profile";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const routeDefinitions = createRoutesFromElements(
   <Route path="/" element={<App />}>
@@ -30,13 +34,30 @@ const routeDefinitions = createRoutesFromElements(
     <Route path="/shop" element={<Shop />} loader={productsLoader} />
     <Route path="/product/:id" element={<ProductDetail />} loader={productDetailLoader} />
     <Route path="/cart" element={<Cart />} />
-    <Route path="/checkout" element={<Checkout />} />
+    <Route path="/checkout" element={
+      <ProtectedRoute>
+        <Checkout />
+      </ProtectedRoute>
+    } />
     <Route path="/ai-stylist" element={<AiStylist />} />
     <Route path="/about" element={<About />} />
     <Route path="/contact" element={<Contact />} action={contactAction} />
     <Route path="/collections" element={<Shop />} loader={productsLoader} />
     <Route path="/wishlist" element={<Cart />} />
-    <Route path="/account" element={<Contact />} />
+
+    {/* Authentication Routes */}
+    <Route path="/register" element={<Register />} />
+    <Route path="/login" element={<Login />} />
+    <Route path="/profile" element={
+      <ProtectedRoute>
+        <Profile />
+      </ProtectedRoute>
+    } />
+    <Route path="/account" element={
+      <ProtectedRoute>
+        <Profile />
+      </ProtectedRoute>
+    } />
 
     <Route path="/admin/login" element={<AdminLogin />} />
     <Route

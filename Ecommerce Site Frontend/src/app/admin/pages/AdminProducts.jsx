@@ -146,7 +146,7 @@ export default function AdminProducts() {
                     {p.name}
                   </td>
                   <td className="p-3 text-amber-800">{p.category}</td>
-                  <td className="p-3 text-amber-800">${p.price}</td>
+                  <td className="p-3 text-amber-800">₹{p.price}</td>
                   <td className="p-3 text-amber-800">{p.rating}</td>
                   <td className="p-3 text-amber-800">
                     {p.active === false ? "No" : "Yes"}

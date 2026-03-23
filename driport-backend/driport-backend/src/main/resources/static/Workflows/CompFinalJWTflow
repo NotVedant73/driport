@@ -1,0 +1,115 @@
+📍 CLIENT SIDE:
+User clicks "Analytics" button
+  ↓
+Frontend sends:
+  GET http://localhost:8080/api/v1/admin/analytics/summary
+  Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImFkbWluQGRyaXBvcnQuY29tIiwicm9sZSI6IlJPTEVfQURNSU4iLCJzdWIiOiJhZG1pbkBkcmlwb3J0LmNvbSIsImlhdCI6MTcxMDkyNjQwMCwiZXhwIjoxNzExNTMxMjAwfQ.signature
+
+────────────────────────────────────────────────────────
+
+📍 SERVER SIDE - FILTER CHAIN:
+
+1️⃣ CorsFilter runs
+   → Checks CORS headers → Passes
+
+2️⃣ CsrfFilter runs
+   → CSRF disabled → Passes
+
+3️⃣ JwtFilter.doFilterInternal() runs ← OUR FILTER
+
+   Step 1: Extract header
+     authHeader = "Bearer eyJhbGci..."
+
+   Step 2: Check format
+     authHeader.startsWith("Bearer ") → ✅ YES
+
+   Step 3: Extract token
+     token = "eyJhbGci..." (removed "Bearer ")
+
+   Step 4: Validate token
+     jwtUtil.isTokenValid(token)
+       → extractAllClaims(token)
+       → Splits: header.payload.signature
+       → Decodes header + payload
+       → Recalculates signature with secret key
+       → Original signature: "signature"
+       → Recalculated: "signature"
+       → Match? ✅ YES
+       → Checks exp: 1711531200 (Mar 27, 2026)
+       → Current time: 1710926400 (Mar 20, 2026)
+       → Expired? ❌ NO
+       → Returns true ✅
+
+   Step 5: Extract claims
+     email = jwtUtil.extractEmail(token)
+       → Parses payload → Gets "email" claim → "admin@driport.com"
+     role = jwtUtil.extractRole(token)
+       → Parses payload → Gets "role" claim → "ROLE_ADMIN"
+
+   Step 6: Create Authentication object
+     authority = new SimpleGrantedAuthority("ROLE_ADMIN")
+     authentication = new UsernamePasswordAuthenticationToken(
+       "admin@driport.com",  // principal
+       null,                 // credentials
+       [ROLE_ADMIN]         // authorities
+     )
+
+   Step 7: Set SecurityContext
+     SecurityContextHolder.getContext().setAuthentication(authentication)
+     → Thread-local storage now contains:
+       {
+         principal: "admin@driport.com",
+         authorities: [ROLE_ADMIN],
+         authenticated: true
+       }
+
+   Step 8: Continue chain
+     filterChain.doFilter(request, response)
+
+4️⃣ UsernamePasswordAuthenticationFilter runs
+   → Checks for form login → Not present → Skips
+
+5️⃣ AnonymousAuthenticationFilter runs
+   → Checks if SecurityContext has authentication
+   → YES (JwtFilter set it) → Skips
+
+6️⃣ AuthorizationFilter runs ← CRITICAL CHECK
+
+   Checks SecurityConfig rule (Line 38):
+     .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+
+   Request URL: /api/v1/admin/analytics/summary
+   → Matches pattern? ✅ YES
+
+   Reads SecurityContext:
+     authentication.getAuthorities() → [ROLE_ADMIN]
+
+   Checks if "ROLE_ADMIN" is present:
+     authorities.contains("ROLE_ADMIN") → ✅ YES
+
+   Decision: ✅ ALLOW REQUEST
+
+7️⃣ Request reaches AdminAnalyticsController.getSummary()
+
+   Controller executes:
+     return adminAnalyticsService.getSummary();
+
+   Returns:
+     {
+       "totalRevenue": 15000.00,
+       "totalOrders": 25,
+       "pendingOrders": 5
+     }
+
+────────────────────────────────────────────────────────
+
+📍 RESPONSE:
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "totalRevenue": 15000.00,
+  "totalOrders": 25,
+  "pendingOrders": 5
+}

@@ -11,7 +11,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class AiOutfitService {
+public class
+AiOutfitService {
 
     private static final List<String> OUTFIT_ORDER = List.of("TOP", "BOTTOM", "OUTERWEAR", "SHOES", "ACCESSORY");
 
@@ -21,9 +22,10 @@ public class AiOutfitService {
         this.productRepository = productRepository;
     }
 
-    public AiOutfitResponseDto generateOutfits(String occasion, String vibe) {
+    public AiOutfitResponseDto generateOutfits(String fitType, String vibe) {
         AiOutfitResponseDto response = new AiOutfitResponseDto();
-        response.setOccasion(occasion != null ? occasion.trim() : "");
+        // reuse "occasion" field to represent fit type label for now
+        response.setOccasion(fitType != null ? fitType.trim() : "");
         response.setVibe(vibe != null ? vibe.trim() : "");
 
         String occ = normalize(response.getOccasion());
@@ -92,6 +94,87 @@ public class AiOutfitService {
         return response;
     }
 
+    public AiOutfitResponseDto generateCompleteFit(Long productId) {
+        Product base = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found with id: " + productId));
+
+        List<Product> all = productRepository.findAll().stream()
+                .filter(p -> (p.getActive() == null || Boolean.TRUE.equals(p.getActive()))
+                        && !p.getId().equals(base.getId()))
+                .collect(Collectors.toList());
+
+        String baseOcc = normalize(base.getOccasionTags());
+        String baseVibe = normalize(base.getStyleTags());
+
+        Map<String, List<Product>> byType = all.stream()
+                .filter(p -> p.getType() != null && !p.getType().trim().isEmpty())
+                .collect(Collectors.groupingBy(p -> p.getType().trim().toUpperCase(), Collectors.toList()));
+
+        List<String> roles = new ArrayList<>();
+        String baseType = base.getType() != null ? base.getType().trim().toUpperCase() : "";
+        if (!baseType.isEmpty()) {
+            roles.add(baseType);
+        }
+        if (!"TOP".equals(baseType)) roles.add("TOP");
+        if (!"BOTTOM".equals(baseType)) roles.add("BOTTOM");
+        if (!"OUTERWEAR".equals(baseType)) roles.add("OUTERWEAR");
+
+        List<AiOutfitItemDto> items = new ArrayList<>();
+        Set<Long> usedIds = new HashSet<>();
+
+        for (String role : roles) {
+            if (role.equals(baseType)) {
+                AiOutfitItemDto baseItem = new AiOutfitItemDto();
+                baseItem.setRole(role);
+                baseItem.setProductId(base.getId());
+                baseItem.setName(base.getName());
+                baseItem.setImage(base.getImage());
+                baseItem.setPrice(base.getPrice());
+                baseItem.setCategory(base.getCategory());
+                items.add(baseItem);
+                usedIds.add(base.getId());
+                continue;
+            }
+
+            List<Product> candidates = byType.getOrDefault(role, Collections.emptyList());
+            Product pick = candidates.stream()
+                    .sorted(Comparator.comparingInt((Product p) -> -scoreCompatibility(base, p, baseOcc, baseVibe)))
+                    .filter(p -> !usedIds.contains(p.getId()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (pick == null) {
+                continue;
+            }
+
+            usedIds.add(pick.getId());
+            AiOutfitItemDto item = new AiOutfitItemDto();
+            item.setRole(role);
+            item.setProductId(pick.getId());
+            item.setName(pick.getName());
+            item.setImage(pick.getImage());
+            item.setPrice(pick.getPrice());
+            item.setCategory(pick.getCategory());
+            items.add(item);
+        }
+
+        AiOutfitResponseDto response = new AiOutfitResponseDto();
+        response.setOccasion("");
+        response.setVibe("");
+
+        if (items.isEmpty()) {
+            response.setOutfits(Collections.emptyList());
+            return response;
+        }
+
+        AiOutfitDto outfit = new AiOutfitDto();
+        outfit.setId("complete-fit-" + productId);
+        outfit.setItems(items);
+        outfit.setExplanation(buildExplanation(items, baseVibe, baseOcc));
+        response.setOutfits(List.of(outfit));
+        return response;
+    }
+
     private static String normalize(String s) {
         if (s == null || s.trim().isEmpty()) return "";
         return s.trim().toLowerCase();
@@ -111,6 +194,21 @@ public class AiOutfitService {
     private static boolean tagsContain(String tags, String term) {
         if (tags == null || term.isEmpty()) return false;
         return tags.toLowerCase().contains(term.toLowerCase());
+    }
+
+    private static int scoreCompatibility(Product base, Product candidate, String baseOcc, String baseVibe) {
+        int score = 0;
+        if (baseOcc != null && !baseOcc.isEmpty()) {
+            if (tagsContain(candidate.getOccasionTags(), baseOcc)) score += 2;
+        }
+        if (baseVibe != null && !baseVibe.isEmpty()) {
+            if (tagsContain(candidate.getStyleTags(), baseVibe)) score += 2;
+        }
+        if (base.getCategory() != null && candidate.getCategory() != null
+                && candidate.getCategory().toLowerCase().contains(base.getCategory().toLowerCase())) {
+            score += 1;
+        }
+        return score;
     }
 
     private static String buildExplanation(List<AiOutfitItemDto> items, String vibe, String occasion) {

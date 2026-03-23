@@ -8,19 +8,30 @@ export default function AdminCoupons() {
   const [coupons, setCoupons] = useState([]);
   const [form, setForm] = useState(empty);
   const [editing, setEditing] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const load = async () => {
-    const res = await apiClient.get("/admin/coupons");
-    setCoupons(res.data);
+    setLoading(true);
+    try {
+      const res = await apiClient.get("/admin/coupons");
+      setCoupons(res.data);
+    } catch {
+      toast.error("Failed to load coupons");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    load().catch(() => toast.error("Failed to load coupons"));
+    load();
   }, []);
 
   const onChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setForm((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
+    setForm((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
   const startCreate = () => {
@@ -71,6 +82,14 @@ export default function AdminCoupons() {
       toast.error(err.response?.data || "Failed to delete coupon");
     }
   };
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-lg p-8 border-2 border-amber-900/10">
+        <p className="text-amber-800">Loading coupons...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -201,4 +220,3 @@ export default function AdminCoupons() {
     </div>
   );
 }
-

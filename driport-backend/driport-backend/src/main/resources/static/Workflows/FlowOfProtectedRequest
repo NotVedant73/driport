@@ -1,0 +1,34 @@
+┌─────────────────────────────────────────────────────────┐
+│ REQUEST: GET /api/v1/admin/analytics/summary            │
+│ Header: Authorization: Bearer eyJhbGci...               │
+└─────────────────────────────────────────────────────────┘
+                        ↓
+┌─────────────────────────────────────────────────────────┐
+│ JwtFilter.doFilterInternal()                            │
+├─────────────────────────────────────────────────────────┤
+│ 1. Extract token from header                            │
+│ 2. Validate with jwtUtil.isTokenValid()                 │
+│ 3. Extract email: "admin@driport.com"                   │
+│ 4. Extract role: "ROLE_ADMIN"                           │
+│ 5. Create Authentication object                         │
+│ 6. SecurityContextHolder.setAuthentication(auth) ✅     │
+└─────────────────────────────────────────────────────────┘
+                        ↓
+┌─────────────────────────────────────────────────────────┐
+│ Spring Security Authorization Filter                    │
+├─────────────────────────────────────────────────────────┤
+│ Checks SecurityConfig rule:                             │
+│ .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")  │
+│                                                         │
+│ Reads SecurityContext:                                  │
+│   - Principal: "admin@driport.com"                      │
+│   - Authorities: [ROLE_ADMIN] ✅                        │
+│                                                         │
+│ Comparison: Does user have ROLE_ADMIN?                  │
+│   ✅ YES → Allow request                                │
+└─────────────────────────────────────────────────────────┘
+                        ↓
+┌─────────────────────────────────────────────────────────┐
+│ AdminAnalyticsController.getSummary()                   │
+│ Returns analytics data                                  │
+└─────────────────────────────────────────────────────────┘

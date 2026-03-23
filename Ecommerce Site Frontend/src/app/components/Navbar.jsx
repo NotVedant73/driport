@@ -1,9 +1,20 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ShoppingBag, Heart, User, Menu, X, Search } from "lucide-react";
+import {
+  ShoppingBag,
+  Heart,
+  User,
+  Menu,
+  X,
+  Search,
+  Shield,
+} from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { isLoggedIn, userRole } = useAuth();
+  const isAdmin = userRole === "ROLE_ADMIN";
 
   return (
     <nav className="bg-amber-50 border-b-2 border-amber-900/20 sticky top-0 z-50">
@@ -68,6 +79,15 @@ export default function Navbar() {
             >
               Contact
             </Link>
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className="flex items-center gap-1 text-amber-900 hover:text-amber-700 transition font-semibold"
+              >
+                <Shield size={16} />
+                Admin
+              </Link>
+            )}
           </div>
 
           {/* Icons */}
@@ -84,12 +104,23 @@ export default function Navbar() {
                 3
               </span>
             </Link>
-            <Link
-              to="/account"
-              className="text-amber-900 hover:text-amber-700 hidden md:block"
-            >
-              <User size={20} />
-            </Link>
+            {isLoggedIn ? (
+              <Link
+                to="/profile"
+                className="text-amber-900 hover:text-amber-700 hidden md:block"
+                title="My Profile"
+              >
+                <User size={20} />
+              </Link>
+            ) : (
+              <Link
+                to="/login"
+                className="text-amber-900 hover:text-amber-700 hidden md:block"
+                title="Login"
+              >
+                <User size={20} />
+              </Link>
+            )}
             <Link
               to="/cart"
               className="text-amber-900 hover:text-amber-700 relative"
@@ -139,18 +170,44 @@ export default function Navbar() {
               >
                 Contact
               </Link>
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  className="flex items-center gap-1 text-amber-900 hover:text-amber-700 font-semibold"
+                >
+                  <Shield size={16} />
+                  Admin Panel
+                </Link>
+              )}
               <Link
                 to="/wishlist"
                 className="text-amber-900 hover:text-amber-700"
               >
                 Wishlist
               </Link>
-              <Link
-                to="/account"
-                className="text-amber-900 hover:text-amber-700"
-              >
-                Account
-              </Link>
+              {isLoggedIn ? (
+                <Link
+                  to="/profile"
+                  className="text-amber-900 hover:text-amber-700"
+                >
+                  My Profile
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    className="text-amber-900 hover:text-amber-700"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="text-amber-900 hover:text-amber-700"
+                  >
+                    Register
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         )}

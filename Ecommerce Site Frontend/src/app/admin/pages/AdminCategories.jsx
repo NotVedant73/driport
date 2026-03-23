@@ -5,37 +5,86 @@ import { toast } from "react-toastify";
 export default function AdminCategories() {
   const [categories, setCategories] = useState([]);
   const [name, setName] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [editingId, setEditingId] = useState(null);
+  const [editName, setEditName] = useState("");
 
   const load = async () => {
-    const res = await apiClient.get("/admin/categories");
-    setCategories(res.data);
+    setLoading(true);
+    try {
+      const res = await apiClient.get("/admin/categories");
+      setCategories(res.data);
+    } catch {
+      toast.error("Failed to load categories");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    load().catch(() => toast.error("Failed to load categories"));
+    load();
   }, []);
 
   const create = async (e) => {
     e.preventDefault();
+    if (!name.trim()) return;
     try {
-      await apiClient.post("/admin/categories", { name, active: true });
+      await apiClient.post("/admin/categories", {
+        name: name.trim(),
+        active: true,
+      });
       setName("");
       toast.success("Category created");
       await load();
     } catch (err) {
-      toast.error(err.response?.data || "Failed to create category");
+      toast.error(err.response?.data?.message || "Failed to create category");
     }
   };
 
-  const remove = async (id) => {
+  const startEdit = (category) => {
+    setEditingId(category.id);
+    setEditName(category.name);
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditName("");
+  };
+
+  const saveEdit = async (id) => {
+    if (!editName.trim()) return;
+    try {
+      await apiClient.put(`/admin/categories/${id}`, {
+        name: editName.trim(),
+        active: true,
+      });
+      toast.success("Category updated");
+      setEditingId(null);
+      setEditName("");
+      await load();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to update category");
+    }
+  };
+
+  const remove = async (id, categoryName) => {
+    if (!confirm(`Are you sure you want to delete "${categoryName}"?`)) return;
     try {
       await apiClient.delete(`/admin/categories/${id}`);
       toast.success("Category deleted");
       await load();
     } catch (err) {
-      toast.error(err.response?.data || "Failed to delete category");
+      toast.error(err.response?.data?.message || "Failed to delete category");
     }
   };
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-lg p-8 border-2 border-amber-900/10">
+        <p className="text-amber-800">Loading categories...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-lg p-8 border-2 border-amber-900/10">
@@ -61,18 +110,53 @@ export default function AdminCategories() {
             key={c.id}
             className="flex items-center justify-between border-2 border-amber-900/10 rounded p-3"
           >
-            <div>
-              <div className="text-amber-900 font-semibold">{c.name}</div>
-              <div className="text-xs text-amber-700">
-                {c.active === false ? "Inactive" : "Active"}
-              </div>
-            </div>
-            <button
-              onClick={() => remove(c.id)}
-              className="px-4 py-2 border-2 border-red-500 text-red-600 rounded hover:bg-red-500 hover:text-white transition"
-            >
-              Delete
-            </button>
+            {editingId === c.id ? (
+              <>
+                <input
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="flex-1 px-3 py-2 border-2 border-amber-900/20 rounded focus:outline-none focus:border-amber-900 mr-2"
+                  autoFocus
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => saveEdit(c.id)}
+                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={cancelEdit}
+                    className="px-4 py-2 border-2 border-gray-400 text-gray-600 rounded hover:bg-gray-100 transition"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div>
+                  <div className="text-amber-900 font-semibold">{c.name}</div>
+                  <div className="text-xs text-amber-700">
+                    {c.active === false ? "Inactive" : "Active"}
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => startEdit(c)}
+                    className="px-4 py-2 border-2 border-amber-900 text-amber-900 rounded hover:bg-amber-900 hover:text-amber-50 transition"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => remove(c.id, c.name)}
+                    className="px-4 py-2 border-2 border-red-500 text-red-600 rounded hover:bg-red-500 hover:text-white transition"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         ))}
         {categories.length === 0 && (
@@ -82,4 +166,3 @@ export default function AdminCategories() {
     </div>
   );
 }
-

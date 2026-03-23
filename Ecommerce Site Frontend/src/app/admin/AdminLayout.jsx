@@ -1,6 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-
-const ADMIN_SESSION_KEY = "driport_admin_session";
+import { useAuth } from "../context/AuthContext";
 
 function NavItem({ to, label }) {
   const location = useLocation();
@@ -21,9 +20,10 @@ function NavItem({ to, label }) {
 
 export default function AdminLayout() {
   const navigate = useNavigate();
+  const { logout: authLogout } = useAuth();
 
-  const logout = () => {
-    localStorage.removeItem(ADMIN_SESSION_KEY);
+  const handleLogout = () => {
+    authLogout();
     navigate("/admin/login");
   };
 
@@ -33,10 +33,12 @@ export default function AdminLayout() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-4xl font-serif text-amber-900">Admin Panel</h1>
-            <p className="text-amber-800">Manage products, orders and promotions</p>
+            <p className="text-amber-800">
+              Manage products, orders and promotions
+            </p>
           </div>
           <button
-            onClick={logout}
+            onClick={handleLogout}
             className="px-5 py-2 border-2 border-amber-900 text-amber-900 rounded hover:bg-amber-900 hover:text-amber-50 transition"
           >
             Logout
@@ -60,4 +62,3 @@ export default function AdminLayout() {
     </div>
   );
 }
-

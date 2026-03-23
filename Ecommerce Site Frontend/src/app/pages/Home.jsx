@@ -3,6 +3,7 @@ import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { ArrowRight, Star, Truck, RefreshCw, Shield } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getAllProducts } from "./ProductService";
+import { BASE_URL } from "../../config";
 
 export default function Home() {
   const featuredProducts = useLoaderData();
@@ -120,7 +121,7 @@ export default function Home() {
               <h3 className="font-semibold text-amber-900 mb-2">
                 Free Shipping
               </h3>
-              <p className="text-sm text-amber-800">On orders over $100</p>
+              <p className="text-sm text-amber-800">On orders over ₹800</p>
             </div>
             <div className="text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-100 text-amber-900 mb-4">
@@ -171,7 +172,7 @@ export default function Home() {
               >
                 <div className="aspect-[3/4] overflow-hidden">
                   <ImageWithFallback
-                    src={product.image}
+                    src={`${BASE_URL}${product.image}`}
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
@@ -185,7 +186,7 @@ export default function Home() {
                   </h3>
                   <div className="flex items-center justify-between">
                     <span className="text-lg font-serif text-amber-900">
-                      ${product.price}
+                      ₹{product.price}
                     </span>
                     <div className="flex gap-1">
                       {[...Array(5)].map((_, i) => (

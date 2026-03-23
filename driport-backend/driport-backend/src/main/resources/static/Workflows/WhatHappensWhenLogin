@@ -1,0 +1,35 @@
+📍 Step 1: AuthController receives POST /api/v1/auth/login
+  └─> Passes LoginRequestDto to AuthService
+
+📍 Step 2: AuthService.login() validates credentials
+  └─> Calls jwtUtil.generateToken("admin@driport.com", "ROLE_ADMIN")
+
+📍 Step 3: Inside generateToken():
+  ┌─ Creates claims Map: {email: "admin@driport.com", role: "ROLE_ADMIN"}
+  ├─ Adds subject: "admin@driport.com"
+  ├─ Adds issuedAt: 2026-03-20T10:30:00Z
+  ├─ Adds expiration: 2026-03-27T10:30:00Z (7 days later)
+  ├─ Calls getSigningKey() → converts secret to SecretKey
+  ├─ Calls signWith(secretKey) → generates HMAC-SHA256 signature
+  └─ Returns: "eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImFkbWluQGRyaXBvcn..."
+
+📍 Step 4: AuthService returns AuthResponseDto with token
+  └─> Frontend receives: {email: "...", role: "...", token: "eyJ..."}
+
+📍 Step 5: Frontend stores token in localStorage
+
+📍 Step 6: User makes request to GET /api/v1/admin/analytics/summary
+  └─> Frontend attaches header: Authorization: Bearer eyJhbGci...
+
+📍 Step 7: JwtFilter intercepts request (we'll create this next)
+  ┌─ Extracts token from header
+  ├─ Calls jwtUtil.isTokenValid(token)
+  │   └─> extractAllClaims() verifies signature + expiration
+  ├─ Calls jwtUtil.extractEmail(token) → "admin@driport.com"
+  ├─ Calls jwtUtil.extractRole(token) → "ROLE_ADMIN"
+  ├─ Populates SecurityContext with user info
+  └─> Request proceeds to AdminAnalyticsController
+
+📍 Step 8: Spring Security checks: Does user have ROLE_ADMIN?
+  └─> YES → Allow request
+  └─> NO → Return 403 Forbidden

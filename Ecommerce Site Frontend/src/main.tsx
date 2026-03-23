@@ -8,25 +8,35 @@
 import { StrictMode } from "react";
 import { ToastContainer, Bounce } from "react-toastify";
 import { CartProvider } from "./app/context/CartContext.jsx";
-  
-  
+import { AuthProvider } from "./app/context/AuthContext.jsx";
+
+  // ✅ Get theme safely (client-side only)
+  const getTheme = () => {
+    if (typeof window === 'undefined') return 'light';
+    try {
+      return localStorage.getItem("theme") === "dark" ? "dark" : "light";
+    } catch {
+      return 'light';
+    }
+  };
 
 
   createRoot(document.getElementById("root")!).render(
     <StrictMode>
-      <CartProvider>
-        <RouterProvider router={appRouter}/>
-        <ToastContainer
-          position="top-center"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          draggable
-          pauseOnHover
-          theme={localStorage.getItem("theme") === "dark" ? "dark" : "light"}
-          transition={Bounce}
-        />
-      </CartProvider>
+      <AuthProvider>
+        <CartProvider>
+          <RouterProvider router={appRouter}/>
+          <ToastContainer
+            position="top-center"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            draggable
+            pauseOnHover
+            theme={getTheme()}
+            transition={Bounce}
+          />
+        </CartProvider>
+      </AuthProvider>
     </StrictMode>
   );
-  

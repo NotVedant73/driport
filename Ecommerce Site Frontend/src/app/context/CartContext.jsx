@@ -6,19 +6,26 @@ const CART_STORAGE_KEY = "driport_cart";
 
 export function CartProvider({ children }) {
   const [items, setItems] = useState(() => {
+    // ✅ Only access localStorage on client-side
+    if (typeof window === 'undefined') return [];
+
     try {
       const stored = localStorage.getItem(CART_STORAGE_KEY);
       return stored ? JSON.parse(stored) : [];
-    } catch {
+    } catch (error) {
+      console.error("Error reading cart from localStorage:", error);
       return [];
     }
   });
 
   useEffect(() => {
+    // ✅ Save to localStorage only on client-side
+    if (typeof window === 'undefined') return;
+
     try {
       localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
-    } catch {
-      // ignore
+    } catch (error) {
+      console.error("Error saving cart to localStorage:", error);
     }
   }, [items]);
 

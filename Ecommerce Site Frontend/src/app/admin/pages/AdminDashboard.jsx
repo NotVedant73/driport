@@ -31,7 +31,7 @@ export default function AdminDashboard() {
           <div className="border-2 border-amber-900/10 rounded p-4">
             <div className="text-sm text-amber-700">Total Revenue</div>
             <div className="text-2xl font-serif text-amber-900">
-              ${Number(summary.totalRevenue || 0).toFixed(2)}
+              ₹{Number(summary.totalRevenue || 0).toFixed(2)}
             </div>
           </div>
           <div className="border-2 border-amber-900/10 rounded p-4">

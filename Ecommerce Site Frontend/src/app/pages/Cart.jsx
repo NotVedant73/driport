@@ -40,13 +40,13 @@ export default function Cart() {
             <div className="lg:col-span-2 space-y-4">
               {items.map((item) => (
                 <div
-                  key={item.id}
+                  key={item.productId}
                   className="bg-white rounded-lg p-6 flex gap-6 border-2 border-amber-900/10"
                 >
                   <Link to={`/product/${item.productId}`} className="flex-shrink-0">
                     <div className="w-32 h-32 rounded overflow-hidden">
                       <ImageWithFallback
-                        src={item.image}
+                        src={item.image || ''}
                         alt={item.name}
                         className="w-full h-full object-cover hover:scale-105 transition-transform"
                       />
@@ -83,7 +83,7 @@ export default function Cart() {
                         </button>
                       </div>
                       <div className="text-xl font-serif text-amber-900">
-                        ${(Number(item.price) * item.quantity).toFixed(2)}
+                        ₹{(Number(item.price) * item.quantity).toFixed(2)}
                       </div>
                     </div>
                   </div>
@@ -104,20 +104,20 @@ export default function Cart() {
                 <div className="space-y-4 mb-6">
                   <div className="flex justify-between text-amber-800">
                     <span>Subtotal</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                    <span>₹{subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-amber-800">
                     <span>Shipping</span>
-                    <span>${shipping.toFixed(2)}</span>
+                    <span>₹{shipping.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-amber-800">
                     <span>Tax</span>
-                    <span>${tax.toFixed(2)}</span>
+                    <span>₹{tax.toFixed(2)}</span>
                   </div>
                   <div className="border-t-2 border-amber-900/10 pt-4">
                   <div className="flex justify-between text-xl font-serif text-amber-900">
                     <span>Total</span>
-                    <span>${total.toFixed(2)}</span>
+                    <span>₹{total.toFixed(2)}</span>
                   </div>
                   </div>
                 </div>

@@ -1,12 +1,8 @@
 package com.driport.driport_backend.entiity;
 
-
 import jakarta.persistence.*;
-import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
-import java.time.Instant;
-
 
 @Entity
 @Table(name = "PRODUCTS")

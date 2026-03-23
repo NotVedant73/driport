@@ -1,19 +1,29 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import apiClient from "../../api/apiClient";
 import { useCart } from "../context/CartContext.jsx";
+import { useAuth } from "../context/AuthContext";
+import { toast } from "react-toastify";
 
 export default function Checkout() {
   const navigate = useNavigate();
   const { items, subtotal, clearCart } = useCart();
+  const { userEmail } = useAuth();  // ✅ Get user email from auth
 
   const [form, setForm] = useState({
     customerName: "",
-    customerEmail: "",
+    customerEmail: userEmail || "",  // ✅ Pre-fill email
     customerPhone: "",
     shippingAddress: "",
     notes: "",
   });
+
+  // Update email if it changes (edge case)
+  useEffect(() => {
+    if (userEmail && !form.customerEmail) {
+      setForm((prev) => ({ ...prev, customerEmail: userEmail }));
+    }
+  }, [userEmail]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -62,13 +72,25 @@ export default function Checkout() {
         })),
       };
 
-      await apiClient.post("/orders", payload);
+      const response = await apiClient.post("/orders", payload);
+
+      toast.success("Order placed successfully! 🎉");
       clearCart();
-      navigate("/");
+
+      // Navigate to order success or shop page
+      navigate("/shop");
     } catch (err) {
-      setError(
-        err.response?.data || "Something went wrong while placing your order."
-      );
+      const data = err.response?.data;
+
+      if (err.response?.status === 401) {
+        toast.error("Please login to place an order");
+        navigate("/login", { state: { from: "/checkout" } });
+      } else {
+        const errorMsg = data?.message ||
+                        (typeof data === "string" ? data : "Something went wrong while placing your order.");
+        setError(errorMsg);
+        toast.error(errorMsg);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -184,7 +206,7 @@ export default function Checkout() {
                     {item.name} × {item.quantity}
                   </span>
                   <span>
-                    ${(Number(item.price) * item.quantity).toFixed(2)}
+                    ₹{(Number(item.price) * item.quantity).toFixed(2)}
                   </span>
                 </li>
               ))}
@@ -192,7 +214,7 @@ export default function Checkout() {
             <div className="border-t-2 border-amber-900/10 pt-4 space-y-2">
               <div className="flex justify-between text-amber-800">
                 <span>Subtotal</span>
-                <span>${subtotal.toFixed(2)}</span>
+                <span>₹{subtotal.toFixed(2)}</span>
               </div>
             </div>
           </div>

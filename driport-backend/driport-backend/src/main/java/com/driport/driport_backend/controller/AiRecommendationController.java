@@ -19,8 +19,19 @@ public class AiRecommendationController {
 
     @GetMapping("/outfit")
     public AiOutfitResponseDto getOutfit(
-            @RequestParam(value = "occasion", defaultValue = "") String occasion,
+            @RequestParam(value = "fitType", required = false) String fitType,
+            @RequestParam(value = "occasion", required = false) String legacyOccasion,
             @RequestParam(value = "vibe", defaultValue = "") String vibe) {
-        return aiOutfitService.generateOutfits(occasion, vibe);
+
+        String effectiveFit = (fitType != null && !fitType.isBlank())
+                ? fitType
+                : (legacyOccasion != null ? legacyOccasion : "");
+
+        return aiOutfitService.generateOutfits(effectiveFit, vibe);
+    }
+
+    @GetMapping("/complete-fit")
+    public AiOutfitResponseDto completeFit(@RequestParam("productId") Long productId) {
+        return aiOutfitService.generateCompleteFit(productId);
     }
 }

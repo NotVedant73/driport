@@ -1,14 +1,25 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, useLoaderData } from "react-router-dom";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Star, Heart, SlidersHorizontal } from "lucide-react";
-import apiClient from "../../api/apiClient";
-import { getAllProducts } from "./ProductService";
+import { BASE_URL } from "../../config";
 
 export default function Shop() {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedSort, setSelectedSort] = useState("ratingDesc");
-  //const [products, setProducts] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [maxPrice, setMaxPrice] = useState(5000);
+  const ITEMS_PER_PAGE = 20;
+  const CATEGORIES = [
+    "Tshirts",
+    "Shirts",
+    "Jackets",
+    "Jeans",
+    "Cargos",
+    "Trackpants",
+    "Pants",
+  ];
 
   //const [loading, setLoading] = useState(true);
 
@@ -44,22 +55,42 @@ export default function Shop() {
   const sortedProducts = useMemo(() => {
     if (!Array.isArray(products)) return [];
 
-    return [...products].sort((a, b) => {
-      switch (selectedSort) {
-        case "priceAsc":
-          return a.price - b.price;
+    return [...products]
+      .filter((p) => {
+        const categoryMatch =
+          selectedCategories.length === 0 ||
+          selectedCategories.some(
+            (c) => c.toLowerCase() === (p.category || "").toLowerCase(),
+          );
+        const priceMatch = Number(p.price) <= maxPrice;
+        return categoryMatch && priceMatch;
+      })
+      .sort((a, b) => {
+        switch (selectedSort) {
+          case "priceAsc":
+            return a.price - b.price;
 
-        case "priceDesc":
-          return b.price - a.price;
+          case "priceDesc":
+            return b.price - a.price;
 
-        case "ratingDesc":
-          return b.rating - a.rating;
+          case "ratingDesc":
+            return b.rating - a.rating;
 
-        default:
-          return 0;
-      }
-    });
-  }, [products, selectedSort]);
+          default:
+            return 0;
+        }
+      });
+  }, [products, selectedSort, selectedCategories, maxPrice]);
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(sortedProducts.length / ITEMS_PER_PAGE),
+  );
+
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return sortedProducts.slice(start, start + ITEMS_PER_PAGE);
+  }, [sortedProducts, currentPage]);
 
   // if (loading) {
   //   return (
@@ -179,92 +210,66 @@ export default function Shop() {
           <aside
             className={`${showFilters ? "block" : "hidden"} lg:block w-full lg:w-64 space-y-6`}
           >
+            {/* Categories */}
             <div className="bg-white p-6 rounded-lg border-2 border-amber-900/10">
-              <h3 className="font-semibold text-amber-900 mb-4">Categories</h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-amber-900">Categories</h3>
+                {selectedCategories.length > 0 && (
+                  <button
+                    onClick={() => {
+                      setSelectedCategories([]);
+                      setCurrentPage(1);
+                    }}
+                    className="text-xs text-amber-700 hover:text-amber-900 underline"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
               <ul className="space-y-2">
-                <li>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" className="rounded text-amber-900" />
-                    <span className="text-amber-800">All Items</span>
-                  </label>
-                </li>
-                <li>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" className="rounded text-amber-900" />
-                    <span className="text-amber-800">Dresses</span>
-                  </label>
-                </li>
-                <li>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" className="rounded text-amber-900" />
-                    <span className="text-amber-800">Jackets</span>
-                  </label>
-                </li>
-                <li>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" className="rounded text-amber-900" />
-                    <span className="text-amber-800">Accessories</span>
-                  </label>
-                </li>
-                <li>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" className="rounded text-amber-900" />
-                    <span className="text-amber-800">Shoes</span>
-                  </label>
-                </li>
+                {CATEGORIES.map((cat) => (
+                  <li key={cat}>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="rounded text-amber-900"
+                        checked={selectedCategories.includes(cat)}
+                        onChange={(e) => {
+                          setCurrentPage(1);
+                          setSelectedCategories((prev) =>
+                            e.target.checked
+                              ? [...prev, cat]
+                              : prev.filter((c) => c !== cat),
+                          );
+                        }}
+                      />
+                      <span className="text-amber-800">{cat}</span>
+                    </label>
+                  </li>
+                ))}
               </ul>
             </div>
 
+            {/* Price Range */}
             <div className="bg-white p-6 rounded-lg border-2 border-amber-900/10">
               <h3 className="font-semibold text-amber-900 mb-4">Price Range</h3>
-              <input type="range" min="0" max="500" className="w-full" />
+              <input
+                type="range"
+                min="0"
+                max="5000"
+                step="50"
+                value={maxPrice}
+                onChange={(e) => {
+                  setMaxPrice(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="w-full accent-amber-900"
+              />
               <div className="flex justify-between text-sm text-amber-800 mt-2">
-                <span>$0</span>
-                <span>$500</span>
-              </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg border-2 border-amber-900/10">
-              <h3 className="font-semibold text-amber-900 mb-4">Era</h3>
-              <ul className="space-y-2">
-                <li>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" className="rounded text-amber-900" />
-                    <span className="text-amber-800">1950s</span>
-                  </label>
-                </li>
-                <li>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" className="rounded text-amber-900" />
-                    <span className="text-amber-800">1960s</span>
-                  </label>
-                </li>
-                <li>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" className="rounded text-amber-900" />
-                    <span className="text-amber-800">1970s</span>
-                  </label>
-                </li>
-                <li>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" className="rounded text-amber-900" />
-                    <span className="text-amber-800">1980s</span>
-                  </label>
-                </li>
-              </ul>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg border-2 border-amber-900/10">
-              <h3 className="font-semibold text-amber-900 mb-4">Size</h3>
-              <div className="grid grid-cols-3 gap-2">
-                {["XS", "S", "M", "L", "XL", "XXL"].map((size) => (
-                  <button
-                    key={size}
-                    className="border-2 border-amber-900/20 text-amber-800 py-2 rounded hover:bg-amber-900 hover:text-amber-50 transition"
-                  >
-                    {size}
-                  </button>
-                ))}
+                <span>₹0</span>
+                <span className="font-semibold text-amber-900">
+                  ≤ ₹{maxPrice.toLocaleString()}
+                </span>
               </div>
             </div>
           </aside>
@@ -274,7 +279,16 @@ export default function Shop() {
             {/* Toolbar */}
             <div className="flex items-center justify-between mb-8">
               <div className="text-amber-800">
-                Showing <span className="font-semibold">{products.length}</span>{" "}
+                Showing{" "}
+                <span className="font-semibold">
+                  {(currentPage - 1) * ITEMS_PER_PAGE + 1}–
+                  {Math.min(
+                    currentPage * ITEMS_PER_PAGE,
+                    sortedProducts.length,
+                  )}
+                </span>{" "}
+                of{" "}
+                <span className="font-semibold">{sortedProducts.length}</span>{" "}
                 products
               </div>
               <div className="flex items-center gap-4">
@@ -288,7 +302,10 @@ export default function Shop() {
                 <select
                   className="px-4 py-2 border-2 border-amber-900/20 rounded bg-white text-amber-900"
                   value={selectedSort}
-                  onChange={(e) => setSelectedSort(e.target.value)}
+                  onChange={(e) => {
+                    setSelectedSort(e.target.value);
+                    setCurrentPage(1);
+                  }}
                 >
                   {sortList.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -301,7 +318,7 @@ export default function Shop() {
 
             {/* Products */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {sortedProducts.map((product) => (
+              {paginatedProducts.map((product) => (
                 <div
                   key={product.id}
                   className="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border-2 border-amber-900/10"
@@ -312,7 +329,7 @@ export default function Shop() {
                   >
                     <div className="aspect-[3/4] overflow-hidden relative">
                       <ImageWithFallback
-                        src={product.image}
+                        src={`${BASE_URL}${product.image}`}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
@@ -350,11 +367,11 @@ export default function Shop() {
                       <div className="flex items-center justify-between">
                         <div>
                           <span className="text-lg font-serif text-amber-900">
-                            ${product.price}
+                            ₹{product.price}
                           </span>
                           {product.price && (
                             <span className="text-sm text-gray-400 line-through ml-2">
-                              ${product.price}
+                              ₹{product.price}
                             </span>
                           )}
                         </div>
@@ -369,23 +386,48 @@ export default function Shop() {
             </div>
 
             {/* Pagination */}
-            <div className="flex justify-center gap-2 mt-12">
-              <button className="px-4 py-2 border-2 border-amber-900/20 text-amber-900 rounded hover:bg-amber-900 hover:text-amber-50 transition">
-                Previous
-              </button>
-              <button className="px-4 py-2 bg-amber-900 text-amber-50 rounded">
-                1
-              </button>
-              <button className="px-4 py-2 border-2 border-amber-900/20 text-amber-900 rounded hover:bg-amber-900 hover:text-amber-50 transition">
-                2
-              </button>
-              <button className="px-4 py-2 border-2 border-amber-900/20 text-amber-900 rounded hover:bg-amber-900 hover:text-amber-50 transition">
-                3
-              </button>
-              <button className="px-4 py-2 border-2 border-amber-900/20 text-amber-900 rounded hover:bg-amber-900 hover:text-amber-50 transition">
-                Next
-              </button>
-            </div>
+            {totalPages > 1 && (
+              <div className="flex justify-center gap-2 mt-12 flex-wrap">
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => {
+                    setCurrentPage((p) => p - 1);
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                  className="px-4 py-2 border-2 border-amber-900/20 text-amber-900 rounded hover:bg-amber-900 hover:text-amber-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Previous
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (page) => (
+                    <button
+                      key={page}
+                      onClick={() => {
+                        setCurrentPage(page);
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      className={`px-4 py-2 rounded transition ${
+                        currentPage === page
+                          ? "bg-amber-900 text-amber-50"
+                          : "border-2 border-amber-900/20 text-amber-900 hover:bg-amber-900 hover:text-amber-50"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ),
+                )}
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() => {
+                    setCurrentPage((p) => p + 1);
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                  className="px-4 py-2 border-2 border-amber-900/20 text-amber-900 rounded hover:bg-amber-900 hover:text-amber-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

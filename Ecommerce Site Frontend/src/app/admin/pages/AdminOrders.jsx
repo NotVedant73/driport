@@ -73,7 +73,7 @@ export default function AdminOrders() {
                   <td className="p-3 font-semibold text-amber-900">#{o.id}</td>
                   <td className="p-3 text-amber-800">{o.customerName}</td>
                   <td className="p-3 text-amber-800">{o.status}</td>
-                  <td className="p-3 text-amber-800">${o.totalAmount}</td>
+                  <td className="p-3 text-amber-800">₹{o.totalAmount}</td>
                   <td className="p-3 text-amber-800">{o.itemCount}</td>
                   <td className="p-3">
                     <button
@@ -145,13 +145,13 @@ export default function AdminOrders() {
                     <span>
                       {it.productName} × {it.quantity}
                     </span>
-                    <span>${it.lineTotal}</span>
+                    <span>₹{it.lineTotal}</span>
                   </div>
                 ))}
               </div>
               <div className="border-t-2 border-amber-900/10 mt-3 pt-3 flex justify-between text-amber-900 font-semibold">
                 <span>Total</span>
-                <span>${detail.totalAmount}</span>
+                <span>₹{detail.totalAmount}</span>
               </div>
             </div>
           </div>
