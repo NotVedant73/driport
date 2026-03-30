@@ -4,29 +4,29 @@ import apiClient from "../../api/apiClient";
 import { useCart } from "../context/CartContext.jsx";
 import { BASE_URL } from "../../config";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { Sparkles, ShoppingBag } from "lucide-react";
+import { Sparkles, ShoppingBag, RefreshCw } from "lucide-react"; // ← ADD RefreshCw
 import { toast } from "react-toastify";
 
+// UPDATED FIT TYPES - Match streetwear style
 const FIT_TYPES = [
   { value: "", label: "Any fit" },
-  { value: "office", label: "Office" },
-  { value: "casual", label: "Casual" },
-  { value: "vintage", label: "Vintage" },
-  { value: "branded", label: "Branded" },
-  { value: "party", label: "Party" },
-  { value: "sports", label: "Sports" },
-  { value: "gym", label: "Gym" },
-  { value: "streetwear", label: "Streetwear" },
+  { value: "oversized", label: "Oversized" },
+  { value: "regular", label: "Regular Fit" },
+  { value: "slim", label: "Slim Fit" },
+  { value: "relaxed", label: "Relaxed Fit" },
+  { value: "loose", label: "Loose Fit" },
 ];
 
+// UPDATED VIBES - Match your product tags
 const VIBES = [
   { value: "", label: "Any vibe" },
-  { value: "vintage", label: "Vintage" },
-  { value: "genz", label: "Gen-Z" },
-  { value: "minimal", label: "Minimal" },
-  { value: "boho", label: "Boho" },
+  { value: "casual", label: "Casual" },
   { value: "streetwear", label: "Streetwear" },
-  { value: "classic", label: "Classic" },
+  { value: "vintage", label: "Vintage" },
+  { value: "minimal", label: "Minimal" },
+  { value: "retro", label: "Retro" },
+  { value: "sporty", label: "Sporty" },
+  { value: "anime", label: "Anime Style" },
 ];
 
 export default function AiStylist() {
@@ -37,8 +37,9 @@ export default function AiStylist() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // GENERATE FUNCTION - Called on first generation AND regeneration
   const generate = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault(); // Only prevent default if called from form submit
     setLoading(true);
     setError("");
     setData(null);
@@ -47,11 +48,25 @@ export default function AiStylist() {
         params: { fitType, vibe },
       });
       setData(res.data);
+
+      // Show toast on successful generation
+      if (res.data?.outfits?.length > 0) {
+        toast.success("AI generated your outfit! ✨");
+      }
     } catch (err) {
-      setError(err.response?.data || "Failed to generate outfit. Try again.");
+      console.error("AI generation error:", err);
+      setError(
+        err.response?.data?.message || "Failed to generate outfit. Try again.",
+      );
+      toast.error("Failed to generate outfit");
     } finally {
       setLoading(false);
     }
+  };
+
+  // NEW: REGENERATE FUNCTION - Just calls generate again!
+  const regenerate = () => {
+    generate(); // Same function, AI returns different result due to temperature=0.7
   };
 
   const addOutfitToCart = (outfit) => {
@@ -82,8 +97,8 @@ export default function AiStylist() {
             AI Outfit Stylist
           </h1>
           <p className="text-amber-800 text-lg max-w-xl mx-auto">
-            Choose an occasion and vibe — we’ll suggest a complete outfit from
-            our collection.
+            Powered by Google Gemini AI — Select your style and let AI curate
+            the perfect outfit from our collection.
           </p>
         </div>
 
@@ -94,7 +109,7 @@ export default function AiStylist() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-semibold text-amber-900 mb-2">
-                Fit type
+                Fit Type
               </label>
               <select
                 value={fitType}
@@ -126,44 +141,65 @@ export default function AiStylist() {
             </div>
           </div>
 
-          {error && <p className="text-red-600 text-sm mt-4">{error}</p>}
+          {error && (
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+              {error}
+            </div>
+          )}
 
           <div className="pt-6 mt-2 border-t-2 border-amber-900/10">
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-amber-900 text-amber-50 py-4 rounded hover:bg-amber-800 transition font-semibold text-lg disabled:opacity-60 flex items-center justify-center gap-2"
-          >
-            {loading ? (
-              "Generating outfit..."
-            ) : (
-              <>
-                <Sparkles size={20} />
-                Generate outfit
-              </>
-            )}
-          </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-amber-900 text-amber-50 py-4 rounded hover:bg-amber-800 transition font-semibold text-lg disabled:opacity-60 flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <RefreshCw size={20} className="animate-spin" />
+                  Generating outfit...
+                </>
+              ) : (
+                <>
+                  <Sparkles size={20} />
+                  Generate Outfit with AI
+                </>
+              )}
+            </button>
           </div>
         </form>
 
         {data?.outfits?.length > 0 && (
           <div className="space-y-8">
-            <h2 className="text-2xl font-serif text-amber-900 text-center">
-              Your outfit for {data.occasion || "any occasion"} (
-              {data.vibe || "any vibe"})
-            </h2>
+            <div className="text-center">
+              <h2 className="text-2xl font-serif text-amber-900 mb-2">
+                Your AI-Curated Outfit
+              </h2>
+              <p className="text-amber-700">
+                {data.occasion && `Fit: ${data.occasion}`}
+                {data.occasion && data.vibe && " • "}
+                {data.vibe && `Vibe: ${data.vibe}`}
+              </p>
+            </div>
 
             {data.outfits.map((outfit) => (
               <div
                 key={outfit.id}
                 className="bg-white rounded-lg p-8 border-2 border-amber-900/10"
               >
+                {/* AI EXPLANATION */}
                 {outfit.explanation && (
-                  <p className="text-amber-800 mb-6 italic">
-                    {outfit.explanation}
-                  </p>
+                  <div className="mb-6 p-4 bg-amber-50 rounded-lg border border-amber-200">
+                    <p className="text-amber-900 flex items-start gap-2">
+                      <Sparkles
+                        size={18}
+                        className="mt-1 flex-shrink-0 text-amber-600"
+                      />
+                      <span className="italic">{outfit.explanation}</span>
+                    </p>
+                  </div>
                 )}
 
+                {/* OUTFIT ITEMS */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-6">
                   {outfit.items?.map((item) => (
                     <Link
@@ -191,13 +227,29 @@ export default function AiStylist() {
                   ))}
                 </div>
 
-                <button
-                  onClick={() => addOutfitToCart(outfit)}
-                  className="w-full md:w-auto px-8 py-3 bg-amber-900 text-amber-50 rounded hover:bg-amber-800 transition font-semibold flex items-center justify-center gap-2"
-                >
-                  <ShoppingBag size={20} />
-                  Add full outfit to cart
-                </button>
+                {/* ACTION BUTTONS */}
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    onClick={() => addOutfitToCart(outfit)}
+                    className="flex-1 px-8 py-3 bg-amber-900 text-amber-50 rounded hover:bg-amber-800 transition font-semibold flex items-center justify-center gap-2"
+                  >
+                    <ShoppingBag size={20} />
+                    Add Full Outfit to Cart
+                  </button>
+
+                  {/* NEW: REGENERATE BUTTON */}
+                  <button
+                    onClick={regenerate}
+                    disabled={loading}
+                    className="px-8 py-3 bg-white text-amber-900 border-2 border-amber-900 rounded hover:bg-amber-50 transition font-semibold flex items-center justify-center gap-2 disabled:opacity-60"
+                  >
+                    <RefreshCw
+                      size={20}
+                      className={loading ? "animate-spin" : ""}
+                    />
+                    {loading ? "Regenerating..." : "Try Another Outfit"}
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -205,15 +257,18 @@ export default function AiStylist() {
 
         {data?.outfits?.length === 0 && data !== null && !loading && (
           <div className="bg-white rounded-lg p-12 border-2 border-amber-900/10 text-center">
-            <p className="text-amber-800 mb-4">
-              No matching outfit found. Add more products in Admin with Type and
-              tags (style / occasion) to get AI suggestions.
+            <Sparkles size={48} className="mx-auto text-amber-300 mb-4" />
+            <p className="text-amber-800 mb-4 text-lg">
+              No matching outfit found for these preferences.
+            </p>
+            <p className="text-amber-700 text-sm mb-6">
+              Try different combinations or browse our shop to see all products.
             </p>
             <Link
               to="/shop"
-              className="text-amber-900 font-semibold hover:text-amber-700"
+              className="inline-block px-6 py-3 bg-amber-900 text-amber-50 rounded hover:bg-amber-800 transition font-semibold"
             >
-              Browse shop
+              Browse Shop
             </Link>
           </div>
         )}

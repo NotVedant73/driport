@@ -8,11 +8,11 @@ import { toast } from "react-toastify";
 export default function Checkout() {
   const navigate = useNavigate();
   const { items, subtotal, clearCart } = useCart();
-  const { userEmail } = useAuth();  // ✅ Get user email from auth
+  const { userEmail } = useAuth(); // ✅ Get user email from auth
 
   const [form, setForm] = useState({
     customerName: "",
-    customerEmail: userEmail || "",  // ✅ Pre-fill email
+    customerEmail: userEmail || "", // ✅ Pre-fill email
     customerPhone: "",
     shippingAddress: "",
     notes: "",
@@ -24,6 +24,14 @@ export default function Checkout() {
       setForm((prev) => ({ ...prev, customerEmail: userEmail }));
     }
   }, [userEmail]);
+
+  // Load Razorpay script on component mount
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -54,6 +62,86 @@ export default function Checkout() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  /**
+   * Opens Razorpay checkout modal for payment
+   * Called after order is created in backend
+   */
+  const openRazorpayCheckout = (paymentDetails, orderData) => {
+    const { razorpayOrderId, amount, currency, key } = paymentDetails;
+
+    const options = {
+      key: key, // Razorpay Key ID from backend
+      amount: Math.round(amount * 100), // Amount in paise
+      currency: currency,
+      name: "Driport",
+      description: `Order #${orderData.id}`,
+      order_id: razorpayOrderId, // Razorpay order ID from backend
+
+      // Handler on successful payment
+      handler: async (response) => {
+        try {
+          // Call backend to verify payment signature
+          const verificationResponse = await apiClient.post(
+            "/payments/verify",
+            {
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+            },
+          );
+
+          if (verificationResponse.data.success) {
+            toast.success("Payment successful! 🎉");
+            clearCart();
+            // Redirect to order success page or shop
+            navigate("/shop");
+          } else {
+            toast.error("Payment verification failed");
+          }
+        } catch (err) {
+          console.error("Verification error:", err);
+          toast.error("Error verifying payment");
+        }
+      },
+
+      // Handler on payment failure
+      modal: {
+        ondismiss: async () => {
+          try {
+            // Notify backend about payment failure
+            await apiClient.post("/payments/failure", {
+              razorpayOrderId: razorpayOrderId,
+              reason: "User cancelled payment",
+            });
+            toast.warning("Payment cancelled");
+          } catch (err) {
+            console.error("Error handling failure:", err);
+          }
+        },
+      },
+
+      // Prefill customer details for convenience
+      prefill: {
+        name: form.customerName,
+        email: form.customerEmail,
+        contact: form.customerPhone,
+      },
+
+      // Theme colors
+      theme: {
+        color: "#78350f", // amber-900
+      },
+    };
+
+    try {
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+    } catch (err) {
+      console.error("Razorpay error:", err);
+      toast.error("Failed to open payment modal");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -72,13 +160,12 @@ export default function Checkout() {
         })),
       };
 
+      // Step 1: Create order in backend
       const response = await apiClient.post("/orders", payload);
+      const { order, payment } = response.data;
 
-      toast.success("Order placed successfully! 🎉");
-      clearCart();
-
-      // Navigate to order success or shop page
-      navigate("/shop");
+      // Step 2: Open Razorpay checkout modal
+      openRazorpayCheckout(payment, order);
     } catch (err) {
       const data = err.response?.data;
 
@@ -86,8 +173,12 @@ export default function Checkout() {
         toast.error("Please login to place an order");
         navigate("/login", { state: { from: "/checkout" } });
       } else {
-        const errorMsg = data?.message ||
-                        (typeof data === "string" ? data : "Something went wrong while placing your order.");
+        const errorMsg =
+          data?.error ||
+          data?.message ||
+          (typeof data === "string"
+            ? data
+            : "Something went wrong while placing your order.");
         setError(errorMsg);
         toast.error(errorMsg);
       }
@@ -177,18 +268,14 @@ export default function Checkout() {
               />
             </div>
 
-            {error && (
-              <p className="text-red-600 text-sm mt-2">
-                {error}
-              </p>
-            )}
+            {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
 
             <button
               type="submit"
               disabled={isSubmitting}
               className="w-full bg-amber-900 text-amber-50 py-4 rounded hover:bg-amber-800 transition text-lg font-semibold disabled:opacity-60"
             >
-              {isSubmitting ? "Placing Order..." : "Place Order"}
+              {isSubmitting ? "Processing Payment..." : "Proceed to Payment"}
             </button>
           </form>
 
@@ -223,4 +310,3 @@ export default function Checkout() {
     </div>
   );
 }
-

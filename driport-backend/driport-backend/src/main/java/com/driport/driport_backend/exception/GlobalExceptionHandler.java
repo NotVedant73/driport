@@ -73,6 +73,18 @@ public class GlobalExceptionHandler {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
         }
 
+        // 503 Service Unavailable - External API failures (Gemini AI)
+        @ExceptionHandler(GeminiApiException.class)
+        public ResponseEntity<ErrorResponseDto> handleGeminiApiException(
+                        GeminiApiException ex,
+                        HttpServletRequest request) {
+                ErrorResponseDto error = new ErrorResponseDto(
+                                HttpStatus.SERVICE_UNAVAILABLE.value(),
+                                "AI service temporarily unavailable: " + ex.getMessage(),
+                                request.getRequestURI());
+                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
+        }
+
         // 400 Generic IllegalArgumentException (keep for backward compatibility)
         @ExceptionHandler(IllegalArgumentException.class)
         public ResponseEntity<ErrorResponseDto> handleIllegalArgument(

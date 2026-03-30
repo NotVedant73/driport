@@ -42,3 +42,14 @@ apiClient.interceptors.response.use(
 );
 
 export default apiClient;
+
+//response flow
+/**
+ * User logs in at 9:00 AM → JWT valid for 24 hours
+User leaves tab open → Goes to sleep
+Next day at 9:30 AM → Opens tab, clicks "My Orders"
+Backend: "Token expired! 401 Unauthorized"
+Response interceptor: "Caught 401! Auto-logout + redirect to login"
+User: "Oh, I need to login again" ✅
+ * 
+ */
