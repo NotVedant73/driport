@@ -22,6 +22,7 @@ import AdminProducts from "./admin/pages/AdminProducts";
 import AdminCategories from "./admin/pages/AdminCategories";
 import AdminOrders from "./admin/pages/AdminOrders";
 import AdminCoupons from "./admin/pages/AdminCoupons";
+import AdminShipments from "./admin/pages/AdminShipments";
 import AiStylist from "./pages/AiStylist";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
@@ -32,13 +33,20 @@ const routeDefinitions = createRoutesFromElements(
   <Route path="/" element={<App />}>
     <Route index element={<Home />} loader={homeLoader} />
     <Route path="/shop" element={<Shop />} loader={productsLoader} />
-    <Route path="/product/:id" element={<ProductDetail />} loader={productDetailLoader} />
+    <Route
+      path="/product/:id"
+      element={<ProductDetail />}
+      loader={productDetailLoader}
+    />
     <Route path="/cart" element={<Cart />} />
-    <Route path="/checkout" element={
-      <ProtectedRoute>
-        <Checkout />
-      </ProtectedRoute>
-    } />
+    <Route
+      path="/checkout"
+      element={
+        <ProtectedRoute>
+          <Checkout />
+        </ProtectedRoute>
+      }
+    />
     <Route path="/ai-stylist" element={<AiStylist />} />
     <Route path="/about" element={<About />} />
     <Route path="/contact" element={<Contact />} action={contactAction} />
@@ -48,16 +56,22 @@ const routeDefinitions = createRoutesFromElements(
     {/* Authentication Routes */}
     <Route path="/register" element={<Register />} />
     <Route path="/login" element={<Login />} />
-    <Route path="/profile" element={
-      <ProtectedRoute>
-        <Profile />
-      </ProtectedRoute>
-    } />
-    <Route path="/account" element={
-      <ProtectedRoute>
-        <Profile />
-      </ProtectedRoute>
-    } />
+    <Route
+      path="/profile"
+      element={
+        <ProtectedRoute>
+          <Profile />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/account"
+      element={
+        <ProtectedRoute>
+          <Profile />
+        </ProtectedRoute>
+      }
+    />
 
     <Route path="/admin/login" element={<AdminLogin />} />
     <Route
@@ -72,6 +86,7 @@ const routeDefinitions = createRoutesFromElements(
       <Route path="/admin/products" element={<AdminProducts />} />
       <Route path="/admin/categories" element={<AdminCategories />} />
       <Route path="/admin/orders" element={<AdminOrders />} />
+      <Route path="/admin/shipments" element={<AdminShipments />} />
       <Route path="/admin/coupons" element={<AdminCoupons />} />
     </Route>
   </Route>,

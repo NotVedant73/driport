@@ -51,6 +51,7 @@ export default function AdminLayout() {
             <NavItem to="/admin/products" label="Products" />
             <NavItem to="/admin/categories" label="Categories" />
             <NavItem to="/admin/orders" label="Orders" />
+            <NavItem to="/admin/shipments" label="Shipments" />
             <NavItem to="/admin/coupons" label="Coupons" />
           </aside>
 

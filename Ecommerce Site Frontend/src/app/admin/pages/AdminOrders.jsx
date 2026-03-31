@@ -4,11 +4,14 @@ import { toast } from "react-toastify";
 
 const STATUSES = [
   "PENDING",
-  "CONFIRMED",
+  "PAID",
+  "PROCESSING",
   "PACKED",
   "SHIPPED",
+  "OUT_FOR_DELIVERY",
   "DELIVERED",
   "CANCELLED",
+  "PAYMENT_FAILED",
 ];
 
 export default function AdminOrders() {
@@ -101,9 +104,7 @@ export default function AdminOrders() {
         <h3 className="text-xl font-serif text-amber-900 mb-4">Order Detail</h3>
 
         {!detail ? (
-          <p className="text-amber-800">
-            Select an order to view details.
-          </p>
+          <p className="text-amber-800">Select an order to view details.</p>
         ) : (
           <div className="space-y-4">
             <div className="text-amber-900 font-semibold">#{detail.id}</div>
@@ -160,4 +161,3 @@ export default function AdminOrders() {
     </div>
   );
 }
-

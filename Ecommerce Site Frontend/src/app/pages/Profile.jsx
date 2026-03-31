@@ -1,13 +1,23 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { User, Mail, LogOut, ShoppingBag, Settings, Shield } from "lucide-react";
+import {
+  User,
+  Mail,
+  LogOut,
+  ShoppingBag,
+  Settings,
+  Shield,
+} from "lucide-react";
 import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
+import apiClient from "../../api/apiClient";
 
 export default function Profile() {
   const navigate = useNavigate();
-  const { isLoggedIn, userEmail, userRole, logout } = useAuth();  // ✅ Use auth context
+  const { isLoggedIn, userEmail, userRole, logout } = useAuth(); // ✅ Use auth context
   const [orders, setOrders] = useState([]);
+  const [tracking, setTracking] = useState(null);
+  const [loadingOrders, setLoadingOrders] = useState(false);
 
   useEffect(() => {
     // Redirect to login if not authenticated
@@ -17,8 +27,12 @@ export default function Profile() {
       return;
     }
 
-    // TODO: Fetch user's orders from backend
-    // Example: apiClient.get("/orders/my-orders").then(res => setOrders(res.data))
+    setLoadingOrders(true);
+    apiClient
+      .get("/orders/my-orders")
+      .then((res) => setOrders(res.data || []))
+      .catch(() => toast.error("Failed to load your orders"))
+      .finally(() => setLoadingOrders(false));
   }, [isLoggedIn, navigate]);
 
   const handleLogout = () => {
@@ -29,6 +43,30 @@ export default function Profile() {
   };
 
   const isAdmin = userRole === "ROLE_ADMIN";
+
+  const canCancelOrder = (status) => {
+    return ["PENDING", "PAID", "PROCESSING", "PACKED"].includes(status);
+  };
+
+  const handleTrackOrder = async (orderId) => {
+    try {
+      const res = await apiClient.get(`/orders/${orderId}/tracking`);
+      setTracking(res.data);
+    } catch {
+      toast.error("Tracking is not available yet for this order");
+    }
+  };
+
+  const handleCancelOrder = async (orderId) => {
+    try {
+      await apiClient.delete(`/orders/${orderId}`);
+      toast.success("Order cancelled successfully");
+      const res = await apiClient.get("/orders/my-orders");
+      setOrders(res.data || []);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to cancel order");
+    }
+  };
 
   return (
     <div className="bg-amber-50/30 min-h-screen py-12">
@@ -62,9 +100,7 @@ export default function Profile() {
               <Mail size={20} className="text-amber-700" />
               <div>
                 <div className="text-xs text-amber-700 mb-1">Email</div>
-                <div className="text-amber-900 font-medium">
-                  {userEmail}
-                </div>
+                <div className="text-amber-900 font-medium">{userEmail}</div>
               </div>
             </div>
 
@@ -108,7 +144,11 @@ export default function Profile() {
             Order History
           </h2>
 
-          {orders.length === 0 ? (
+          {loadingOrders ? (
+            <div className="text-center py-12 text-amber-800">
+              Loading orders...
+            </div>
+          ) : orders.length === 0 ? (
             <div className="text-center py-12">
               <ShoppingBag size={48} className="mx-auto text-amber-300 mb-4" />
               <p className="text-amber-800 mb-4">No orders yet</p>
@@ -140,14 +180,77 @@ export default function Profile() {
                     </span>
                   </div>
                   <div className="text-sm text-amber-800">
-                    {order.items?.length || 0} items • Ordered on{" "}
-                    {new Date(order.createdAt).toLocaleDateString()}
+                    Ordered on {new Date(order.createdAt).toLocaleDateString()}
+                  </div>
+                  <div className="text-sm text-amber-700 mt-1">
+                    Shipment: {order.shipmentStatus || "Not created yet"}
+                  </div>
+                  <div className="flex gap-2 mt-4">
+                    <button
+                      onClick={() => handleTrackOrder(order.id)}
+                      className="px-3 py-1 border-2 border-amber-900 text-amber-900 rounded hover:bg-amber-900 hover:text-amber-50 transition"
+                    >
+                      Track
+                    </button>
+                    {canCancelOrder(order.status) && (
+                      <button
+                        onClick={() => handleCancelOrder(order.id)}
+                        className="px-3 py-1 border-2 border-red-500 text-red-600 rounded hover:bg-red-500 hover:text-white transition"
+                      >
+                        Cancel
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
           )}
         </div>
+
+        {tracking && (
+          <div className="mt-8 bg-white rounded-lg p-8 border-2 border-amber-900/10">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-serif text-amber-900">
+                Tracking for Order #{tracking.orderId}
+              </h3>
+              <button
+                onClick={() => setTracking(null)}
+                className="px-3 py-1 border-2 border-amber-900 text-amber-900 rounded hover:bg-amber-900 hover:text-amber-50 transition"
+              >
+                Close
+              </button>
+            </div>
+            <div className="text-sm text-amber-800 mb-2">
+              {tracking.courierName} • {tracking.trackingNumber}
+            </div>
+            <div className="text-sm text-amber-800 mb-4">
+              Current shipment status:{" "}
+              <span className="font-semibold">{tracking.shipmentStatus}</span>
+            </div>
+            <div className="space-y-3">
+              {tracking.events?.map((event, idx) => (
+                <div
+                  key={`${event.eventTime}-${idx}`}
+                  className="border-l-2 border-amber-900/30 pl-3"
+                >
+                  <div className="text-sm font-semibold text-amber-900">
+                    {event.status}
+                  </div>
+                  <div className="text-sm text-amber-800">{event.location}</div>
+                  <div className="text-sm text-amber-700">{event.note}</div>
+                  <div className="text-xs text-amber-700">
+                    {new Date(event.eventTime).toLocaleString()}
+                  </div>
+                </div>
+              ))}
+              {!tracking.events?.length && (
+                <div className="text-sm text-amber-800">
+                  No tracking events yet.
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Account Actions */}
         <div className="mt-8 bg-white rounded-lg p-8 border-2 border-amber-900/10">
