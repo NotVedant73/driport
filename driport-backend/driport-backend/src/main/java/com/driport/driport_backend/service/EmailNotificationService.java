@@ -7,6 +7,7 @@ import com.driport.driport_backend.entiity.ShipmentStatus;
 import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -26,7 +27,7 @@ public class EmailNotificationService {
     @Value("${app.email.from:no-reply@driport.local}")
     private String fromEmail;
 
-    public EmailNotificationService(JavaMailSender mailSender) {
+    public EmailNotificationService(@Autowired(required = false) JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
 
@@ -52,7 +53,8 @@ public class EmailNotificationService {
     }
 
     @Async
-    public void sendShipmentStatusUpdate(Order order, Shipment shipment, ShipmentStatus shipmentStatus, String location) {
+    public void sendShipmentStatusUpdate(Order order, Shipment shipment, ShipmentStatus shipmentStatus,
+            String location) {
         if (!emailEnabled) {
             logger.info("Email disabled. Skipping shipment update for order {}", order.getId());
             return;
@@ -76,8 +78,7 @@ public class EmailNotificationService {
                 shipment.getCourierName(),
                 shipment.getTrackingNumber(),
                 shipmentStatus.name(),
-                safeLocation
-        );
+                safeLocation);
 
         sendHtmlEmail(order.getCustomerEmail(), subject, body);
     }
@@ -104,13 +105,17 @@ public class EmailNotificationService {
                 """.formatted(
                 contactRequestDto.getFirstName() != null ? contactRequestDto.getFirstName() : "there",
                 contactRequestDto.getSubject() != null ? contactRequestDto.getSubject() : "General Inquiry",
-                contactRequestDto.getMessage() != null ? contactRequestDto.getMessage() : ""
-        );
+                contactRequestDto.getMessage() != null ? contactRequestDto.getMessage() : "");
 
         sendHtmlEmail(contactRequestDto.getEmail(), subject, body);
     }
 
     private void sendHtmlEmail(String toEmail, String subject, String body) {
+        if (!emailEnabled || mailSender == null) {
+            logger.info("Email unavailable. Skipping email to {} with subject {}", toEmail, subject);
+            return;
+        }
+
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, "UTF-8");
