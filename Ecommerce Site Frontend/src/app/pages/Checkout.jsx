@@ -5,6 +5,32 @@ import { useCart } from "../context/CartContext.jsx";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
 
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const isRetryableNetworkError = (error) => {
+  return (
+    !error?.response ||
+    error?.code === "ERR_NETWORK" ||
+    error?.code === "ECONNABORTED"
+  );
+};
+
+async function postWithRetry(path, payload, maxAttempts = 2) {
+  let lastError;
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      return await apiClient.post(path, payload);
+    } catch (error) {
+      lastError = error;
+      if (!isRetryableNetworkError(error) || attempt === maxAttempts) {
+        break;
+      }
+      await delay(2000);
+    }
+  }
+  throw lastError;
+}
+
 export default function Checkout() {
   const navigate = useNavigate();
   const { items, subtotal, clearCart } = useCart();
@@ -81,14 +107,11 @@ export default function Checkout() {
       handler: async (response) => {
         try {
           // Call backend to verify payment signature
-          const verificationResponse = await apiClient.post(
-            "/payments/verify",
-            {
-              razorpayOrderId: response.razorpay_order_id,
-              razorpayPaymentId: response.razorpay_payment_id,
-              razorpaySignature: response.razorpay_signature,
-            },
-          );
+          const verificationResponse = await postWithRetry("/payments/verify", {
+            razorpayOrderId: response.razorpay_order_id,
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpaySignature: response.razorpay_signature,
+          });
 
           if (verificationResponse.data.success) {
             toast.success("Payment successful! 🎉");
@@ -109,7 +132,7 @@ export default function Checkout() {
         ondismiss: async () => {
           try {
             // Notify backend about payment failure
-            await apiClient.post("/payments/failure", {
+            await postWithRetry("/payments/failure", {
               razorpayOrderId: razorpayOrderId,
               reason: "User cancelled payment",
             });

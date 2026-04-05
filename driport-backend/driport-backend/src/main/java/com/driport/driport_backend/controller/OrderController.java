@@ -99,18 +99,27 @@ public class OrderController {
 
     @GetMapping("/my-orders")
     public ResponseEntity<List<CustomerOrderDto>> getMyOrders(@AuthenticationPrincipal String customerEmail) {
+        if (customerEmail == null || customerEmail.isBlank()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         return ResponseEntity.ok(iOrderService.getMyOrders(customerEmail));
     }
 
     @GetMapping("/{orderId}/tracking")
     public ResponseEntity<ShipmentDto> getTracking(@PathVariable Long orderId,
             @AuthenticationPrincipal String customerEmail) {
+        if (customerEmail == null || customerEmail.isBlank()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         return ResponseEntity.ok(shipmentService.getTracking(orderId, customerEmail));
     }
 
     @DeleteMapping("/{orderId}")
     public ResponseEntity<Void> cancelOrder(@PathVariable Long orderId,
             @AuthenticationPrincipal String customerEmail) {
+        if (customerEmail == null || customerEmail.isBlank()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         shipmentService.cancelOrder(orderId, customerEmail);
         return ResponseEntity.noContent().build();
     }

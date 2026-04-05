@@ -44,6 +44,10 @@ export default function Profile() {
 
   const isAdmin = userRole === "ROLE_ADMIN";
 
+  const canTrackOrder = (order) => {
+    return Boolean(order?.trackingNumber || order?.shipmentStatus);
+  };
+
   const canCancelOrder = (status) => {
     return ["PENDING", "PAID", "PROCESSING", "PACKED"].includes(status);
   };
@@ -186,12 +190,14 @@ export default function Profile() {
                     Shipment: {order.shipmentStatus || "Not created yet"}
                   </div>
                   <div className="flex gap-2 mt-4">
-                    <button
-                      onClick={() => handleTrackOrder(order.id)}
-                      className="px-3 py-1 border-2 border-amber-900 text-stone-900 rounded hover:bg-stone-100 hover:text-amber-50 transition"
-                    >
-                      Track
-                    </button>
+                    {canTrackOrder(order) && (
+                      <button
+                        onClick={() => handleTrackOrder(order.id)}
+                        className="px-3 py-1 border-2 border-amber-900 text-stone-900 rounded hover:bg-stone-100 hover:text-amber-50 transition"
+                      >
+                        Track
+                      </button>
+                    )}
                     {canCancelOrder(order.status) && (
                       <button
                         onClick={() => handleCancelOrder(order.id)}
