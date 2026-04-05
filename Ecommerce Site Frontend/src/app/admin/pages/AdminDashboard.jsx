@@ -17,7 +17,7 @@ export default function AdminDashboard() {
   }, []);
 
   return (
-    <div className="bg-white rounded-lg p-8 border-2 border-amber-900/10">
+    <div className="bg-white rounded-lg p-4 sm:p-8 border-2 border-amber-900/10">
       <h2 className="text-2xl font-serif text-amber-900 mb-6">
         Sales & Analytics
       </h2>
@@ -27,7 +27,7 @@ export default function AdminDashboard() {
       {!summary ? (
         <p className="text-amber-800">Loading...</p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           <div className="border-2 border-amber-900/10 rounded p-4">
             <div className="text-sm text-amber-700">Total Revenue</div>
             <div className="text-2xl font-serif text-amber-900">
@@ -57,4 +57,3 @@ export default function AdminDashboard() {
     </div>
   );
 }
-

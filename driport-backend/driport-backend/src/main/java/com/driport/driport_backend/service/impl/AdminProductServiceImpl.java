@@ -8,6 +8,8 @@ import com.driport.driport_backend.service.IAdminProductService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 @Service
@@ -62,10 +64,13 @@ public class AdminProductServiceImpl implements IAdminProductService {
         if (dto.getRating() == null) {
             throw new IllegalArgumentException("Product rating is required");
         }
+        if (!isAbsoluteHttpUrl(dto.getImage())) {
+            throw new IllegalArgumentException("Product image must be a public http/https URL");
+        }
 
         product.setName(dto.getName().trim());
         product.setPrice(dto.getPrice());
-        product.setImage(dto.getImage());
+        product.setImage(dto.getImage().trim());
         product.setCategory(dto.getCategory().trim());
         product.setRating(dto.getRating());
         product.setDescription(dto.getDescription());
@@ -73,5 +78,19 @@ public class AdminProductServiceImpl implements IAdminProductService {
         product.setType(dto.getType() != null ? dto.getType().trim() : null);
         product.setStyleTags(dto.getStyleTags() != null ? dto.getStyleTags().trim() : null);
         product.setOccasionTags(dto.getOccasionTags() != null ? dto.getOccasionTags().trim() : null);
+    }
+
+    private boolean isAbsoluteHttpUrl(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return false;
+        }
+        try {
+            URI uri = new URI(value.trim());
+            String scheme = uri.getScheme();
+            String host = uri.getHost();
+            return ("http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme)) && host != null;
+        } catch (URISyntaxException ex) {
+            return false;
+        }
     }
 }

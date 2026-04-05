@@ -9,3 +9,8 @@ export const getProductById = async (id) => {
   const response = await apiClient.get(`/products/${id}`);
   return response.data;
 };
+
+export const searchProducts = async (params = {}) => {
+  const response = await apiClient.get("/products/search", { params });
+  return response.data;
+};

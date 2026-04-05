@@ -1,23 +1,31 @@
 package com.driport.driport_backend.controller;
 
 import com.driport.driport_backend.dto.OrderCreateRequestDto;
+import com.driport.driport_backend.dto.CustomerOrderDto;
 import com.driport.driport_backend.dto.OrderSummaryDto;
 import com.driport.driport_backend.dto.RazorpayOrderResponseDto;
+import com.driport.driport_backend.dto.ShipmentDto;
 import com.driport.driport_backend.entiity.Order;
 import com.driport.driport_backend.repository.OrderRepository;
 import com.driport.driport_backend.service.IOrderService;
+import com.driport.driport_backend.service.IShipmentService;
 import com.driport.driport_backend.service.PaymentService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -27,13 +35,16 @@ public class OrderController {
     private static final Logger logger = LoggerFactory.getLogger(OrderController.class);
 
     private final IOrderService iOrderService;
+    private final IShipmentService shipmentService;
     private final PaymentService paymentService;
     private final OrderRepository orderRepository;
 
     public OrderController(IOrderService iOrderService,
+            IShipmentService shipmentService,
             PaymentService paymentService,
             OrderRepository orderRepository) {
         this.iOrderService = iOrderService;
+        this.shipmentService = shipmentService;
         this.paymentService = paymentService;
         this.orderRepository = orderRepository;
     }
@@ -84,6 +95,24 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Failed to create order: " + e.getMessage()));
         }
+    }
+
+    @GetMapping("/my-orders")
+    public ResponseEntity<List<CustomerOrderDto>> getMyOrders(@AuthenticationPrincipal String customerEmail) {
+        return ResponseEntity.ok(iOrderService.getMyOrders(customerEmail));
+    }
+
+    @GetMapping("/{orderId}/tracking")
+    public ResponseEntity<ShipmentDto> getTracking(@PathVariable Long orderId,
+            @AuthenticationPrincipal String customerEmail) {
+        return ResponseEntity.ok(shipmentService.getTracking(orderId, customerEmail));
+    }
+
+    @DeleteMapping("/{orderId}")
+    public ResponseEntity<Void> cancelOrder(@PathVariable Long orderId,
+            @AuthenticationPrincipal String customerEmail) {
+        shipmentService.cancelOrder(orderId, customerEmail);
+        return ResponseEntity.noContent().build();
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

@@ -1,5 +1,6 @@
-import { Link } from 'react-router-dom';
-import { Instagram, Facebook, Twitter, Mail } from 'lucide-react';
+import { Link } from "react-router-dom";
+import { Instagram, Facebook, Twitter, Mail } from "lucide-react";
+import { STORE_CONFIG } from "../../config";
 
 export default function Footer() {
   return (
@@ -8,21 +9,42 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div>
-            <h3 className="text-2xl font-serif mb-4">Vintage Vogue</h3>
+            <h3 className="text-2xl font-serif mb-4">
+              {STORE_CONFIG.brandName}
+            </h3>
             <p className="text-amber-100 text-sm">
-              Curating timeless fashion pieces from bygone eras. Each item tells a unique story.
+              Curating trend-led and store-selected pieces. Fresh drops, styled
+              collections, and creator-led looks.
             </p>
             <div className="flex gap-4 mt-6">
-              <a href="#" className="hover:text-amber-300 transition">
+              <a
+                href={STORE_CONFIG.instagram.profileUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-amber-300 transition"
+              >
                 <Instagram size={20} />
               </a>
-              <a href="#" className="hover:text-amber-300 transition">
+              <a
+                href={STORE_CONFIG.instagram.profileUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-amber-300 transition"
+              >
                 <Facebook size={20} />
               </a>
-              <a href="#" className="hover:text-amber-300 transition">
+              <a
+                href={STORE_CONFIG.instagram.profileUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-amber-300 transition"
+              >
                 <Twitter size={20} />
               </a>
-              <a href="#" className="hover:text-amber-300 transition">
+              <a
+                href={`mailto:${STORE_CONFIG.supportEmail}`}
+                className="hover:text-amber-300 transition"
+              >
                 <Mail size={20} />
               </a>
             </div>
@@ -32,11 +54,37 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold mb-4">Shop</h4>
             <ul className="space-y-2 text-sm text-amber-100">
-              <li><Link to="/shop" className="hover:text-amber-300 transition">All Products</Link></li>
-              <li><Link to="/shop/dresses" className="hover:text-amber-300 transition">Dresses</Link></li>
-              <li><Link to="/shop/jackets" className="hover:text-amber-300 transition">Jackets</Link></li>
-              <li><Link to="/shop/accessories" className="hover:text-amber-300 transition">Accessories</Link></li>
-              <li><Link to="/shop/sale" className="hover:text-amber-300 transition">Sale</Link></li>
+              <li>
+                <Link to="/shop" className="hover:text-amber-300 transition">
+                  All Products
+                </Link>
+              </li>
+              <li>
+                <Link to="/shop" className="hover:text-amber-300 transition">
+                  Trending
+                </Link>
+              </li>
+              <li>
+                <Link to="/shop" className="hover:text-amber-300 transition">
+                  New Arrivals
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/ai-stylist"
+                  className="hover:text-amber-300 transition"
+                >
+                  AI Styled Looks
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/collections"
+                  className="hover:text-amber-300 transition"
+                >
+                  Collections
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -44,11 +92,34 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold mb-4">Customer Service</h4>
             <ul className="space-y-2 text-sm text-amber-100">
-              <li><Link to="/contact" className="hover:text-amber-300 transition">Contact Us</Link></li>
-              <li><Link to="/shipping" className="hover:text-amber-300 transition">Shipping Info</Link></li>
-              <li><Link to="/returns" className="hover:text-amber-300 transition">Returns</Link></li>
-              <li><Link to="/faq" className="hover:text-amber-300 transition">FAQ</Link></li>
-              <li><Link to="/size-guide" className="hover:text-amber-300 transition">Size Guide</Link></li>
+              <li>
+                <Link to="/contact" className="hover:text-amber-300 transition">
+                  Contact Us
+                </Link>
+              </li>
+              <li>
+                <Link to="/profile" className="hover:text-amber-300 transition">
+                  Track Orders
+                </Link>
+              </li>
+              <li>
+                <Link to="/about" className="hover:text-amber-300 transition">
+                  About Store
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/ai-stylist"
+                  className="hover:text-amber-300 transition"
+                >
+                  Style Assistant
+                </Link>
+              </li>
+              <li>
+                <Link to="/login" className="hover:text-amber-300 transition">
+                  Account Access
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -56,7 +127,7 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold mb-4">Newsletter</h4>
             <p className="text-sm text-amber-100 mb-4">
-              Subscribe to get special offers and updates
+              Subscribe to get special offers, new drops, and reel highlights
             </p>
             <div className="flex gap-2">
               <input
@@ -68,11 +139,14 @@ export default function Footer() {
                 Subscribe
               </button>
             </div>
+            <p className="text-xs text-amber-200 mt-2">
+              Newsletter API integration coming in next sprint.
+            </p>
           </div>
         </div>
 
         <div className="border-t border-amber-800 mt-8 pt-8 text-center text-sm text-amber-100">
-          <p>&copy; 2026 Vintage Vogue. All rights reserved.</p>
+          <p>&copy; 2026 {STORE_CONFIG.brandName}. All rights reserved.</p>
         </div>
       </div>
     </footer>

@@ -11,7 +11,6 @@ import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import About from "./pages/About";
 import Contact, { contactAction } from "./pages/Contact";
-import { productsLoader } from "./loader/productsLoader";
 import { homeLoader } from "./loader/homeLoader";
 import { productDetailLoader } from "./loader/productDetailLoader";
 import AdminLayout from "./admin/AdminLayout";
@@ -32,7 +31,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 const routeDefinitions = createRoutesFromElements(
   <Route path="/" element={<App />}>
     <Route index element={<Home />} loader={homeLoader} />
-    <Route path="/shop" element={<Shop />} loader={productsLoader} />
+    <Route path="/shop" element={<Shop />} />
     <Route
       path="/product/:id"
       element={<ProductDetail />}
@@ -50,7 +49,7 @@ const routeDefinitions = createRoutesFromElements(
     <Route path="/ai-stylist" element={<AiStylist />} />
     <Route path="/about" element={<About />} />
     <Route path="/contact" element={<Contact />} action={contactAction} />
-    <Route path="/collections" element={<Shop />} loader={productsLoader} />
+    <Route path="/collections" element={<Shop />} />
     <Route path="/wishlist" element={<Cart />} />
 
     {/* Authentication Routes */}

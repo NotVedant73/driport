@@ -31,3 +31,14 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Local secret and environment overrides
+.env
+.env.*
+application-local.properties
+
+# Keep secrets local
+src/main/resources/application.properties
+
+# IntelliJ local settings that may include properties
+.idea/**/application*.properties

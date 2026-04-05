@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("api/v1/contacts")
+@RequestMapping({ "api/v1/contact", "api/v1/contacts" })
 public class ContactController {
 
     private final IContactService iContactService;

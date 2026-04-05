@@ -69,20 +69,20 @@ export default function Profile() {
   };
 
   return (
-    <div className="bg-amber-50/30 min-h-screen py-12">
+    <div className="bg-[#f5f0e8] min-h-screen py-12">
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Page Header */}
-        <div className="bg-white rounded-lg p-8 border-2 border-amber-900/10 mb-8">
+        <div className="bg-white rounded-lg p-8 border-2 border-stone-200 mb-8">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center">
-                <User size={32} className="text-amber-900" />
+              <div className="w-16 h-16 rounded-full bg-stone-100 flex items-center justify-center">
+                <User size={32} className="text-stone-900" />
               </div>
               <div>
-                <h1 className="text-3xl font-serif text-amber-900">
+                <h1 className="text-3xl font-serif text-stone-900">
                   My Profile
                 </h1>
-                <p className="text-amber-800">Manage your account and orders</p>
+                <p className="text-stone-600">Manage your account and orders</p>
               </div>
             </div>
             <button
@@ -97,24 +97,24 @@ export default function Profile() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Email */}
             <div className="flex items-center gap-3 p-4 bg-amber-50 rounded-lg">
-              <Mail size={20} className="text-amber-700" />
+              <Mail size={20} className="text-stone-500" />
               <div>
-                <div className="text-xs text-amber-700 mb-1">Email</div>
-                <div className="text-amber-900 font-medium">{userEmail}</div>
+                <div className="text-xs text-stone-500 mb-1">Email</div>
+                <div className="text-stone-900 font-medium">{userEmail}</div>
               </div>
             </div>
 
             {/* Role */}
             <div className="flex items-center gap-3 p-4 bg-amber-50 rounded-lg">
-              <Shield size={20} className="text-amber-700" />
+              <Shield size={20} className="text-stone-500" />
               <div>
-                <div className="text-xs text-amber-700 mb-1">Account Type</div>
+                <div className="text-xs text-stone-500 mb-1">Account Type</div>
                 <div className="flex items-center gap-2">
-                  <span className="text-amber-900 font-medium">
+                  <span className="text-stone-900 font-medium">
                     {isAdmin ? "Administrator" : "Customer"}
                   </span>
                   {isAdmin && (
-                    <span className="bg-amber-900 text-amber-50 text-xs px-2 py-1 rounded">
+                    <span className="bg-stone-900 text-white text-xs px-2 py-1 rounded">
                       Admin
                     </span>
                   )}
@@ -125,10 +125,10 @@ export default function Profile() {
 
           {/* Admin Link */}
           {isAdmin && (
-            <div className="mt-6 pt-6 border-t-2 border-amber-900/10">
+            <div className="mt-6 pt-6 border-t-2 border-stone-200">
               <Link
                 to="/admin"
-                className="inline-flex items-center gap-2 bg-amber-900 text-amber-50 px-6 py-3 rounded hover:bg-amber-800 transition font-semibold"
+                className="inline-flex items-center gap-2 bg-stone-900 text-white px-6 py-3 rounded hover:bg-stone-700 transition font-semibold"
               >
                 <Settings size={20} />
                 Go to Admin Dashboard
@@ -138,23 +138,23 @@ export default function Profile() {
         </div>
 
         {/* Order History Section */}
-        <div className="bg-white rounded-lg p-8 border-2 border-amber-900/10">
-          <h2 className="text-2xl font-serif text-amber-900 mb-6 flex items-center gap-2">
+        <div className="bg-white rounded-lg p-8 border-2 border-stone-200">
+          <h2 className="text-2xl font-serif text-stone-900 mb-6 flex items-center gap-2">
             <ShoppingBag size={24} />
             Order History
           </h2>
 
           {loadingOrders ? (
-            <div className="text-center py-12 text-amber-800">
+            <div className="text-center py-12 text-stone-600">
               Loading orders...
             </div>
           ) : orders.length === 0 ? (
             <div className="text-center py-12">
               <ShoppingBag size={48} className="mx-auto text-amber-300 mb-4" />
-              <p className="text-amber-800 mb-4">No orders yet</p>
+              <p className="text-stone-600 mb-4">No orders yet</p>
               <Link
                 to="/shop"
-                className="inline-block bg-amber-900 text-amber-50 px-6 py-3 rounded hover:bg-amber-800 transition"
+                className="inline-block bg-stone-900 text-white px-6 py-3 rounded hover:bg-stone-700 transition"
               >
                 Start Shopping
               </Link>
@@ -164,31 +164,31 @@ export default function Profile() {
               {orders.map((order) => (
                 <div
                   key={order.id}
-                  className="border-2 border-amber-900/10 rounded-lg p-4 hover:border-amber-900/30 transition"
+                  className="border-2 border-stone-200 rounded-lg p-4 hover:border-amber-900/30 transition"
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div>
-                      <div className="text-sm text-amber-700">
+                      <div className="text-sm text-stone-500">
                         Order #{order.id}
                       </div>
-                      <div className="text-lg font-semibold text-amber-900">
+                      <div className="text-lg font-semibold text-stone-900">
                         ₹{order.totalAmount}
                       </div>
                     </div>
-                    <span className="bg-amber-100 text-amber-900 px-3 py-1 rounded text-sm font-medium">
+                    <span className="bg-stone-100 text-stone-900 px-3 py-1 rounded text-sm font-medium">
                       {order.status}
                     </span>
                   </div>
-                  <div className="text-sm text-amber-800">
+                  <div className="text-sm text-stone-600">
                     Ordered on {new Date(order.createdAt).toLocaleDateString()}
                   </div>
-                  <div className="text-sm text-amber-700 mt-1">
+                  <div className="text-sm text-stone-500 mt-1">
                     Shipment: {order.shipmentStatus || "Not created yet"}
                   </div>
                   <div className="flex gap-2 mt-4">
                     <button
                       onClick={() => handleTrackOrder(order.id)}
-                      className="px-3 py-1 border-2 border-amber-900 text-amber-900 rounded hover:bg-amber-900 hover:text-amber-50 transition"
+                      className="px-3 py-1 border-2 border-amber-900 text-stone-900 rounded hover:bg-stone-100 hover:text-amber-50 transition"
                     >
                       Track
                     </button>
@@ -208,22 +208,22 @@ export default function Profile() {
         </div>
 
         {tracking && (
-          <div className="mt-8 bg-white rounded-lg p-8 border-2 border-amber-900/10">
+          <div className="mt-8 bg-white rounded-lg p-8 border-2 border-stone-200">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-serif text-amber-900">
+              <h3 className="text-xl font-serif text-stone-900">
                 Tracking for Order #{tracking.orderId}
               </h3>
               <button
                 onClick={() => setTracking(null)}
-                className="px-3 py-1 border-2 border-amber-900 text-amber-900 rounded hover:bg-amber-900 hover:text-amber-50 transition"
+                className="px-3 py-1 border-2 border-amber-900 text-stone-900 rounded hover:bg-stone-100 hover:text-amber-50 transition"
               >
                 Close
               </button>
             </div>
-            <div className="text-sm text-amber-800 mb-2">
+            <div className="text-sm text-stone-600 mb-2">
               {tracking.courierName} • {tracking.trackingNumber}
             </div>
-            <div className="text-sm text-amber-800 mb-4">
+            <div className="text-sm text-stone-600 mb-4">
               Current shipment status:{" "}
               <span className="font-semibold">{tracking.shipmentStatus}</span>
             </div>
@@ -233,18 +233,18 @@ export default function Profile() {
                   key={`${event.eventTime}-${idx}`}
                   className="border-l-2 border-amber-900/30 pl-3"
                 >
-                  <div className="text-sm font-semibold text-amber-900">
+                  <div className="text-sm font-semibold text-stone-900">
                     {event.status}
                   </div>
-                  <div className="text-sm text-amber-800">{event.location}</div>
-                  <div className="text-sm text-amber-700">{event.note}</div>
-                  <div className="text-xs text-amber-700">
+                  <div className="text-sm text-stone-600">{event.location}</div>
+                  <div className="text-sm text-stone-500">{event.note}</div>
+                  <div className="text-xs text-stone-500">
                     {new Date(event.eventTime).toLocaleString()}
                   </div>
                 </div>
               ))}
               {!tracking.events?.length && (
-                <div className="text-sm text-amber-800">
+                <div className="text-sm text-stone-600">
                   No tracking events yet.
                 </div>
               )}
@@ -253,25 +253,25 @@ export default function Profile() {
         )}
 
         {/* Account Actions */}
-        <div className="mt-8 bg-white rounded-lg p-8 border-2 border-amber-900/10">
-          <h3 className="text-xl font-serif text-amber-900 mb-4">
+        <div className="mt-8 bg-white rounded-lg p-8 border-2 border-stone-200">
+          <h3 className="text-xl font-serif text-stone-900 mb-4">
             Account Settings
           </h3>
           <div className="space-y-3">
-            <button className="w-full text-left px-4 py-3 border-2 border-amber-900/20 rounded hover:border-amber-900 transition">
+            <button className="w-full text-left px-4 py-3 border-2 border-stone-300 rounded hover:border-amber-900 transition">
               <Settings size={18} className="inline mr-2" />
               Update Profile Information
             </button>
-            <button className="w-full text-left px-4 py-3 border-2 border-amber-900/20 rounded hover:border-amber-900 transition">
+            <button className="w-full text-left px-4 py-3 border-2 border-stone-300 rounded hover:border-amber-900 transition">
               <Mail size={18} className="inline mr-2" />
               Change Email Address
             </button>
-            <button className="w-full text-left px-4 py-3 border-2 border-amber-900/20 rounded hover:border-amber-900 transition">
+            <button className="w-full text-left px-4 py-3 border-2 border-stone-300 rounded hover:border-amber-900 transition">
               <Shield size={18} className="inline mr-2" />
               Change Password
             </button>
           </div>
-          <p className="text-sm text-amber-700 mt-4">
+          <p className="text-sm text-stone-500 mt-4">
             * These features will be connected to backend endpoints
           </p>
         </div>

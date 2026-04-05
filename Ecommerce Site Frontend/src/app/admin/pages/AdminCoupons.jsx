@@ -93,8 +93,8 @@ export default function AdminCoupons() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-lg p-8 border-2 border-amber-900/10">
-        <div className="flex items-center justify-between mb-6">
+      <div className="bg-white rounded-lg p-4 sm:p-8 border-2 border-amber-900/10">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
           <h2 className="text-2xl font-serif text-amber-900">Coupons</h2>
           <button
             onClick={startCreate}
@@ -124,10 +124,10 @@ export default function AdminCoupons() {
                   <td className="p-3 text-amber-800">
                     {c.active === false ? "No" : "Yes"}
                   </td>
-                  <td className="p-3 flex gap-2">
+                  <td className="p-3 whitespace-nowrap">
                     <button
                       onClick={() => startEdit(c)}
-                      className="px-3 py-1 border-2 border-amber-900 text-amber-900 rounded hover:bg-amber-900 hover:text-amber-50 transition"
+                      className="px-3 py-1 mr-2 border-2 border-amber-900 text-amber-900 rounded hover:bg-amber-900 hover:text-amber-50 transition"
                     >
                       Edit
                     </button>
@@ -152,7 +152,7 @@ export default function AdminCoupons() {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg p-8 border-2 border-amber-900/10">
+      <div className="bg-white rounded-lg p-4 sm:p-8 border-2 border-amber-900/10">
         <h3 className="text-xl font-serif text-amber-900 mb-4">
           {editing ? `Edit: ${editing.code}` : "Create Coupon"}
         </h3>

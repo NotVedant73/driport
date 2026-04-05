@@ -87,12 +87,12 @@ export default function AdminCategories() {
   }
 
   return (
-    <div className="bg-white rounded-lg p-8 border-2 border-amber-900/10">
+    <div className="bg-white rounded-lg p-4 sm:p-8 border-2 border-amber-900/10">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-serif text-amber-900">Categories</h2>
       </div>
 
-      <form onSubmit={create} className="flex gap-2 mb-6">
+      <form onSubmit={create} className="flex flex-col sm:flex-row gap-2 mb-6">
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -108,7 +108,7 @@ export default function AdminCategories() {
         {categories.map((c) => (
           <div
             key={c.id}
-            className="flex items-center justify-between border-2 border-amber-900/10 rounded p-3"
+            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-2 border-amber-900/10 rounded p-3"
           >
             {editingId === c.id ? (
               <>
@@ -118,16 +118,16 @@ export default function AdminCategories() {
                   className="flex-1 px-3 py-2 border-2 border-amber-900/20 rounded focus:outline-none focus:border-amber-900 mr-2"
                   autoFocus
                 />
-                <div className="flex gap-2">
+                <div className="flex gap-2 w-full sm:w-auto">
                   <button
                     onClick={() => saveEdit(c.id)}
-                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition w-full sm:w-auto"
                   >
                     Save
                   </button>
                   <button
                     onClick={cancelEdit}
-                    className="px-4 py-2 border-2 border-gray-400 text-gray-600 rounded hover:bg-gray-100 transition"
+                    className="px-4 py-2 border-2 border-gray-400 text-gray-600 rounded hover:bg-gray-100 transition w-full sm:w-auto"
                   >
                     Cancel
                   </button>
@@ -141,16 +141,16 @@ export default function AdminCategories() {
                     {c.active === false ? "Inactive" : "Active"}
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 w-full sm:w-auto">
                   <button
                     onClick={() => startEdit(c)}
-                    className="px-4 py-2 border-2 border-amber-900 text-amber-900 rounded hover:bg-amber-900 hover:text-amber-50 transition"
+                    className="px-4 py-2 border-2 border-amber-900 text-amber-900 rounded hover:bg-amber-900 hover:text-amber-50 transition w-full sm:w-auto"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => remove(c.id, c.name)}
-                    className="px-4 py-2 border-2 border-red-500 text-red-600 rounded hover:bg-red-500 hover:text-white transition"
+                    className="px-4 py-2 border-2 border-red-500 text-red-600 rounded hover:bg-red-500 hover:text-white transition w-full sm:w-auto"
                   >
                     Delete
                   </button>

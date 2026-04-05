@@ -3,9 +3,12 @@ package com.driport.driport_backend.service;
 import com.driport.driport_backend.dto.PaymentVerificationDto;
 import com.driport.driport_backend.dto.RazorpayOrderResponseDto;
 import com.driport.driport_backend.entiity.Order;
+import com.driport.driport_backend.entiity.OrderItem;
+import com.driport.driport_backend.entiity.OrderStatus;
 import com.driport.driport_backend.entiity.Payment;
 import com.driport.driport_backend.repository.OrderRepository;
 import com.driport.driport_backend.repository.PaymentRepository;
+import com.driport.driport_backend.repository.ProductRepository;
 import com.razorpay.RazorpayClient;
 import com.razorpay.Utils;
 import org.json.JSONObject;
@@ -30,6 +33,8 @@ public class PaymentService {
     private final RazorpayClient razorpayClient;
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
+    private final ProductRepository productRepository;
+    private final EmailNotificationService emailNotificationService;
 
     @Value("${razorpay.key.id}")
     private String razorpayKeyId;
@@ -41,11 +46,15 @@ public class PaymentService {
     private String currency;
 
     public PaymentService(RazorpayClient razorpayClient,
-                          PaymentRepository paymentRepository,
-                          OrderRepository orderRepository) {
+            PaymentRepository paymentRepository,
+            OrderRepository orderRepository,
+            ProductRepository productRepository,
+            EmailNotificationService emailNotificationService) {
         this.razorpayClient = razorpayClient;
         this.paymentRepository = paymentRepository;
         this.orderRepository = orderRepository;
+        this.productRepository = productRepository;
+        this.emailNotificationService = emailNotificationService;
     }
 
     /**
@@ -89,8 +98,7 @@ public class PaymentService {
                     razorpayOrderId,
                     order.getTotalAmount(),
                     currency,
-                    "CREATED"
-            );
+                    "CREATED");
             paymentRepository.save(payment);
 
             // Return response for frontend
@@ -99,7 +107,7 @@ public class PaymentService {
                     order.getId(),
                     order.getTotalAmount(),
                     currency,
-                    razorpayKeyId  // Frontend needs Key ID for Razorpay checkout
+                    razorpayKeyId // Frontend needs Key ID for Razorpay checkout
             );
 
         } catch (Exception e) {
@@ -114,7 +122,8 @@ public class PaymentService {
      *
      * SECURITY CRITICAL: Prevents fake payment confirmations
      *
-     * @param verificationDto Contains order ID, payment ID, and signature from frontend
+     * @param verificationDto Contains order ID, payment ID, and signature from
+     *                        frontend
      * @return true if signature is valid, false otherwise
      */
     @Transactional
@@ -137,6 +146,7 @@ public class PaymentService {
             boolean isValid = Utils.verifyPaymentSignature(attributes, razorpayKeySecret);
 
             if (isValid) {
+                boolean firstSuccess = !"SUCCESS".equals(payment.getStatus());
                 // Signature valid → Update payment status
                 payment.setRazorpayPaymentId(verificationDto.getRazorpayPaymentId());
                 payment.setRazorpaySignature(verificationDto.getRazorpaySignature());
@@ -146,8 +156,12 @@ public class PaymentService {
 
                 // Update order status to PAID
                 Order order = payment.getOrder();
-                order.setStatus("PAID");
+                order.setStatus(OrderStatus.PAID.name());
                 orderRepository.save(order);
+
+                if (firstSuccess) {
+                    emailNotificationService.sendOrderConfirmation(order);
+                }
 
                 logger.info("Payment verified successfully: {} for Order ID: {}",
                         verificationDto.getRazorpayPaymentId(), order.getId());
@@ -163,6 +177,13 @@ public class PaymentService {
                 payment.setUpdatedAt(Instant.now());
                 paymentRepository.save(payment);
 
+                Order order = payment.getOrder();
+                if (OrderStatus.fromValue(order.getStatus()) == OrderStatus.PENDING) {
+                    restoreStock(order);
+                    order.setStatus(OrderStatus.PAYMENT_FAILED.name());
+                    orderRepository.save(order);
+                }
+
                 return false;
             }
 
@@ -177,7 +198,7 @@ public class PaymentService {
      * Called if payment fails or user cancels
      *
      * @param razorpayOrderId Razorpay order ID
-     * @param reason Failure reason
+     * @param reason          Failure reason
      */
     @Transactional
     public void handlePaymentFailure(String razorpayOrderId, String reason) {
@@ -193,8 +214,11 @@ public class PaymentService {
 
             // Update order status
             Order order = payment.getOrder();
-            order.setStatus("PAYMENT_FAILED");
-            orderRepository.save(order);
+            if (OrderStatus.fromValue(order.getStatus()) == OrderStatus.PENDING) {
+                restoreStock(order);
+                order.setStatus(OrderStatus.PAYMENT_FAILED.name());
+                orderRepository.save(order);
+            }
 
             logger.info("Payment failed for Order ID: {} - Reason: {}", order.getId(), reason);
 
@@ -209,7 +233,7 @@ public class PaymentService {
      *
      * Note: Webhook signature verification is DIFFERENT from payment signature
      *
-     * @param webhookBody Raw webhook body from Razorpay
+     * @param webhookBody      Raw webhook body from Razorpay
      * @param webhookSignature Signature from X-Razorpay-Signature header
      * @return true if webhook processed successfully
      */
@@ -248,8 +272,9 @@ public class PaymentService {
                     paymentRepository.save(payment);
 
                     Order order = payment.getOrder();
-                    order.setStatus("PAID");
+                    order.setStatus(OrderStatus.PAID.name());
                     orderRepository.save(order);
+                    emailNotificationService.sendOrderConfirmation(order);
 
                     logger.info("Webhook: Payment captured for Order ID: {}", order.getId());
                 }
@@ -260,6 +285,12 @@ public class PaymentService {
         } catch (Exception e) {
             logger.error("Error processing webhook", e);
             return false;
+        }
+    }
+
+    private void restoreStock(Order order) {
+        for (OrderItem item : order.getItems()) {
+            productRepository.incrementStock(item.getProduct().getId(), item.getQuantity());
         }
     }
 }

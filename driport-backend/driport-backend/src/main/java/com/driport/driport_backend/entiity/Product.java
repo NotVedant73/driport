@@ -90,6 +90,12 @@ public class Product {
     @Column(name = "ACTIVE")
     private Boolean active;
 
+    @Column(name = "STOCK_QUANTITY", nullable = false)
+    private Integer stockQuantity = 1;
+
+    @Column(name = "LOW_STOCK_THRESHOLD", nullable = false)
+    private Integer lowStockThreshold = 1;
+
     @Column(name = "PRODUCT_TYPE", length = 50)
     private String type;
 
@@ -129,6 +135,22 @@ public class Product {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Integer getStockQuantity() {
+        return stockQuantity;
+    }
+
+    public void setStockQuantity(Integer stockQuantity) {
+        this.stockQuantity = stockQuantity;
+    }
+
+    public Integer getLowStockThreshold() {
+        return lowStockThreshold;
+    }
+
+    public void setLowStockThreshold(Integer lowStockThreshold) {
+        this.lowStockThreshold = lowStockThreshold;
     }
 
 }

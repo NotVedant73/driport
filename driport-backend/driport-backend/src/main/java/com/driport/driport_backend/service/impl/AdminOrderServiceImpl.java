@@ -6,6 +6,7 @@ import com.driport.driport_backend.dto.AdminOrderListDto;
 import com.driport.driport_backend.dto.AdminOrderStatusUpdateDto;
 import com.driport.driport_backend.entiity.Order;
 import com.driport.driport_backend.entiity.OrderItem;
+import com.driport.driport_backend.entiity.OrderStatus;
 import com.driport.driport_backend.exception.ResourceNotFoundException;
 import com.driport.driport_backend.repository.OrderRepository;
 import com.driport.driport_backend.service.IAdminOrderService;
@@ -47,9 +48,19 @@ public class AdminOrderServiceImpl implements IAdminOrderService {
         if (dto.getStatus() == null || dto.getStatus().trim().isEmpty()) {
             throw new IllegalArgumentException("Status is required");
         }
+
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order", id));
-        order.setStatus(dto.getStatus().trim().toUpperCase());
+
+        OrderStatus currentStatus = OrderStatus.fromValue(order.getStatus());
+        OrderStatus targetStatus = OrderStatus.fromValue(dto.getStatus());
+
+        if (!currentStatus.canTransitionTo(targetStatus)) {
+            throw new IllegalArgumentException(
+                    "Invalid order status transition from " + currentStatus + " to " + targetStatus);
+        }
+
+        order.setStatus(targetStatus.name());
         orderRepository.save(order);
     }
 

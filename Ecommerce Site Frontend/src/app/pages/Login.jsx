@@ -51,24 +51,24 @@ export default function Login() {
   };
 
   return (
-    <div className="bg-amber-50/30 min-h-screen flex items-center justify-center py-12 px-4">
-      <div className="bg-white rounded-lg p-8 border-2 border-amber-900/10 w-full max-w-md">
+    <div className="bg-[#f5f0e8] min-h-screen flex items-center justify-center py-12 px-4">
+      <div className="bg-white rounded-lg p-8 border-2 border-stone-200 w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-100 text-amber-900 mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-stone-100 text-stone-900 mb-4">
             <LogIn size={32} />
           </div>
-          <h1 className="text-3xl font-serif text-amber-900 mb-2">
+          <h1 className="text-3xl font-serif text-stone-900 mb-2">
             Welcome Back
           </h1>
-          <p className="text-amber-800">Login to your DriPort account</p>
+          <p className="text-stone-600">Login to your DriPort account</p>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Email Field */}
           <div>
-            <label className="block text-sm font-semibold text-amber-900 mb-2">
+            <label className="block text-sm font-semibold text-stone-900 mb-2">
               <Mail size={16} className="inline mr-2" />
               Email Address
             </label>
@@ -78,14 +78,14 @@ export default function Login() {
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 border-2 border-amber-900/20 rounded focus:outline-none focus:border-amber-900"
+              className="w-full px-4 py-3 border-2 border-stone-300 rounded focus:outline-none focus:border-amber-300"
               placeholder="Enter your email"
             />
           </div>
 
           {/* Password Field */}
           <div>
-            <label className="block text-sm font-semibold text-amber-900 mb-2">
+            <label className="block text-sm font-semibold text-stone-900 mb-2">
               <Lock size={16} className="inline mr-2" />
               Password
             </label>
@@ -95,7 +95,7 @@ export default function Login() {
               value={formData.password}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 border-2 border-amber-900/20 rounded focus:outline-none focus:border-amber-900"
+              className="w-full px-4 py-3 border-2 border-stone-300 rounded focus:outline-none focus:border-amber-300"
               placeholder="Enter your password"
             />
           </div>
@@ -104,7 +104,7 @@ export default function Login() {
           <div className="text-right">
             <a
               href="#"
-              className="text-sm text-amber-700 hover:text-amber-900"
+              className="text-sm text-stone-500 hover:text-stone-900"
             >
               Forgot password?
             </a>
@@ -114,7 +114,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-amber-900 text-amber-50 py-3 rounded hover:bg-amber-800 transition font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full bg-stone-900 text-white py-3 rounded hover:bg-stone-700 transition font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {loading ? "Logging in..." : "Login"}
           </button>
@@ -122,11 +122,11 @@ export default function Login() {
 
         {/* Register Link */}
         <div className="mt-6 text-center">
-          <p className="text-amber-800">
+          <p className="text-stone-600">
             Don't have an account?{" "}
             <Link
               to="/register"
-              className="text-amber-900 font-semibold hover:text-amber-700"
+              className="text-stone-900 font-semibold hover:text-stone-500"
             >
               Register here
             </Link>

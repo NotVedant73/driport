@@ -15,6 +15,16 @@ const emptyForm = {
   occasionTags: "",
 };
 
+const isAbsoluteHttpUrl = (value) => {
+  if (!value || typeof value !== "string") return false;
+  try {
+    const parsed = new URL(value.trim());
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
+};
+
 export default function AdminProducts() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -40,8 +50,12 @@ export default function AdminProducts() {
     if (!q) return products;
     return products.filter(
       (p) =>
-        String(p.name || "").toLowerCase().includes(q) ||
-        String(p.category || "").toLowerCase().includes(q)
+        String(p.name || "")
+          .toLowerCase()
+          .includes(q) ||
+        String(p.category || "")
+          .toLowerCase()
+          .includes(q),
     );
   }, [products, query]);
 
@@ -77,8 +91,15 @@ export default function AdminProducts() {
   const save = async (e) => {
     e.preventDefault();
     try {
+      const image = String(form.image || "").trim();
+      if (!isAbsoluteHttpUrl(image)) {
+        toast.error("Image URL must be a valid public http/https URL.");
+        return;
+      }
+
       const payload = {
         ...form,
+        image,
         price: Number(form.price),
         rating: Number(form.rating),
       };
@@ -109,8 +130,8 @@ export default function AdminProducts() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-lg p-8 border-2 border-amber-900/10">
-        <div className="flex items-center justify-between mb-6">
+      <div className="bg-white rounded-lg p-4 sm:p-8 border-2 border-amber-900/10">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
           <h2 className="text-2xl font-serif text-amber-900">Products</h2>
           <button
             onClick={startCreate}
@@ -142,19 +163,17 @@ export default function AdminProducts() {
             <tbody>
               {filtered.map((p) => (
                 <tr key={p.id} className="border-t border-amber-900/10">
-                  <td className="p-3 font-semibold text-amber-900">
-                    {p.name}
-                  </td>
+                  <td className="p-3 font-semibold text-amber-900">{p.name}</td>
                   <td className="p-3 text-amber-800">{p.category}</td>
                   <td className="p-3 text-amber-800">₹{p.price}</td>
                   <td className="p-3 text-amber-800">{p.rating}</td>
                   <td className="p-3 text-amber-800">
                     {p.active === false ? "No" : "Yes"}
                   </td>
-                  <td className="p-3 flex gap-2">
+                  <td className="p-3 whitespace-nowrap">
                     <button
                       onClick={() => startEdit(p)}
-                      className="px-3 py-1 border-2 border-amber-900 text-amber-900 rounded hover:bg-amber-900 hover:text-amber-50 transition"
+                      className="px-3 py-1 mr-2 border-2 border-amber-900 text-amber-900 rounded hover:bg-amber-900 hover:text-amber-50 transition"
                     >
                       Edit
                     </button>
@@ -179,7 +198,7 @@ export default function AdminProducts() {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg p-8 border-2 border-amber-900/10">
+      <div className="bg-white rounded-lg p-4 sm:p-8 border-2 border-amber-900/10">
         <h3 className="text-xl font-serif text-amber-900 mb-4">
           {editing ? `Edit: ${editing.name}` : "Create Product"}
         </h3>
@@ -255,15 +274,29 @@ export default function AdminProducts() {
 
           <div>
             <label className="block text-sm font-semibold text-amber-900 mb-1">
-              Image URL
+              Image URL (Supabase Public URL)
             </label>
             <input
               name="image"
               value={form.image}
               onChange={onChange}
               className="w-full px-3 py-2 border-2 border-amber-900/20 rounded focus:outline-none focus:border-amber-900"
-              placeholder="https://..."
+              placeholder="https://<project-ref>.supabase.co/storage/v1/object/public/product-images/products/item.webp"
+              required
             />
+            <p className="mt-1 text-xs text-amber-800/80">
+              Upload image to Supabase bucket and paste the public URL.
+            </p>
+            {isAbsoluteHttpUrl(form.image) && (
+              <div className="mt-3 w-32 h-32 rounded border border-amber-900/20 overflow-hidden bg-amber-50">
+                <img
+                  src={form.image.trim()}
+                  alt="Product preview"
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+            )}
           </div>
 
           <div>
@@ -342,4 +375,3 @@ export default function AdminProducts() {
     </div>
   );
 }
-

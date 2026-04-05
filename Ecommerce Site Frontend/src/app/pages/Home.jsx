@@ -1,269 +1,290 @@
-import { Link, useLoaderData } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { ArrowRight, Star, Truck, RefreshCw, Shield } from "lucide-react";
+import { ArrowRight, Play } from "lucide-react";
+import { STORE_CONFIG } from "../../config";
 import { useEffect, useState } from "react";
-import { getAllProducts } from "./ProductService";
-import { BASE_URL } from "../../config";
 
 export default function Home() {
-  const featuredProducts = useLoaderData();
-  // const [featuredProducts, setFeaturedProducts] = useState([]);
-  // const [loading, setLoading] = useState(true);
-  // const [error, setError] = useState(null);
+  const [activeSlideMap, setActiveSlideMap] = useState(() =>
+    STORE_CONFIG.landingCards.reduce((acc, card) => {
+      acc[card.id] = 0;
+      return acc;
+    }, {}),
+  );
 
-  // useEffect(() => {
-  //   fetchFeatured();
-  // }, []);
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveSlideMap((current) => {
+        const next = { ...current };
+        STORE_CONFIG.landingCards.forEach((card) => {
+          const currentIndex = current[card.id] || 0;
+          next[card.id] = (currentIndex + 1) % card.slides.length;
+        });
+        return next;
+      });
+    }, 2600);
+    return () => clearInterval(timer);
+  }, []);
 
-  // const fetchFeatured = async () => {
-  //   try {
-  //     const data = await getAllProducts();
-  //     //take first 3 products as featured
-  //     setFeaturedProducts(data.slice(0, 4));
-  //   } catch (error) {
-  //     setError(
-  //       error.response?.data?.message ||
-  //         "Failed to fetch products. Please try again.",
-  //     );
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  // if (loading) {
-  //   return (
-  //     <div className="flex items-center justify-center min-h-screen">
-  //       <span className="text-xl font-semibold">Loading products...</span>
-  //     </div>
-  //   );
-  // }
-
-  // if (error) {
-  //   return (
-  //     <div className="flex items-center justify-center min-h-screen">
-  //       <span className="text-xl text-red-500">Error: {error}</span>
-  //     </div>
-  //   );
-  // }
-
-  // const featuredProducts = [
-  //   {
-  //     id: 1,
-  //     name: 'Vintage Floral Dress',
-  //     price: 89.99,
-  //     image: 'https://images.unsplash.com/photo-1764684808666-ca5969aba565?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aW50YWdlJTIwZmFzaGlvbiUyMHdvbWFuJTIwZHJlc3N8ZW58MXx8fHwxNzcwNjQ5NzAxfDA&ixlib=rb-4.1.0&q=80&w=1080',
-  //     category: 'Dresses'
-  //   },
-  //   {
-  //     id: 2,
-  //     name: 'Classic Leather Jacket',
-  //     price: 159.99,
-  //     image: 'https://images.unsplash.com/photo-1763922756509-a00702811d83?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyZXRybyUyMGphY2tldCUyMGxlYXRoZXIlMjB2aW50YWdlfGVufDF8fHx8MTc3MDY0OTcwMXww&ixlib=rb-4.1.0&q=80&w=1080',
-  //     category: 'Jackets'
-  //   },
-  //   {
-  //     id: 3,
-  //     name: 'Retro Denim Jeans',
-  //     price: 69.99,
-  //     image: 'https://images.unsplash.com/photo-1758615590250-e26d339f322c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aW50YWdlJTIwZGVuaW0lMjBqZWFucyUyMGNsYXNzaWN8ZW58MXx8fHwxNzcwNjQ5NzAyfDA&ixlib=rb-4.1.0&q=80&w=1080',
-  //     category: 'Bottoms'
-  //   },
-  //   {
-  //     id: 4,
-  //     name: 'Vintage Sunglasses',
-  //     price: 45.99,
-  //     image: 'https://images.unsplash.com/photo-1756725519458-6f99b485569e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aW50YWdlJTIwYWNjZXNzb3JpZXMlMjBzdW5nbGFzc2VzfGVufDF8fHx8MTc3MDY0OTcwMnww&ixlib=rb-4.1.0&q=80&w=1080',
-  //     category: 'Accessories'
-  //   }
-  // ];
+  const heroCards = STORE_CONFIG.landingCards.slice(0, 2);
+  const reviewCard = STORE_CONFIG.landingCards[2];
+  const reviewIndex = reviewCard ? activeSlideMap[reviewCard.id] || 0 : 0;
+  const reviewSlide = reviewCard ? reviewCard.slides[reviewIndex] : null;
 
   return (
-    <div>
-      {/* Hero Section */}
-      <section className="relative h-[600px] bg-gradient-to-r from-amber-100 to-amber-50 overflow-hidden">
-        <div className="absolute inset-0 opacity-20">
-          <ImageWithFallback
-            src="https://images.unsplash.com/photo-1666861585341-5bd1e7b1ed71?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aW50YWdlJTIwc3RvcmUlMjBjbG90aGluZyUyMGJvdXRpcXVlfGVufDF8fHx8MTc3MDY0OTcwM3ww&ixlib=rb-4.1.0&q=80&w=1080"
-            alt="Vintage Store"
-            className="w-full h-full object-cover"
-          />
+    <div className="bg-[#f5f0e8]">
+      {/* ── HERO ── */}
+      <section
+        className="
+          relative min-h-[calc(100svh-64px)]
+          bg-[url('/images/hero-fashion.jpg')] bg-cover bg-center bg-no-repeat
+          overflow-hidden
+        "
+      >
+        {/* cream overlay — left heavy for text, transparent right for image */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#f5f0e8]/95 via-[#f5f0e8]/80 to-[#f5f0e8]/20" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#f5f0e8]/30 via-transparent to-[#f5f0e8]/40" />
+
+        {/* 2-col layout: text left, cards right */}
+        <div className="relative z-10 min-h-[calc(100svh-64px)] flex items-center px-6 md:px-10 lg:px-16 py-8">
+          <div className="w-full max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-[1fr_1.6fr] gap-8 lg:gap-12 items-center">
+            {/* ── LEFT: Text + CTAs ── */}
+            <div className="flex flex-col justify-center">
+              <p className="text-[10px] tracking-[0.3em] uppercase text-stone-400 mb-5">
+                Spring / Summer 2026
+              </p>
+
+              <h1 className="font-serif text-stone-900 leading-[1.05] tracking-tight text-3xl md:text-4xl lg:text-5xl">
+                {STORE_CONFIG.tagline || (
+                  <>
+                    New arrivals,
+                    <br />
+                    <span className="italic text-stone-500">considered.</span>
+                  </>
+                )}
+              </h1>
+
+              <div className="mt-5 mb-5 w-10 h-px bg-stone-300" />
+
+              <p className="text-stone-500 text-sm leading-relaxed max-w-xs">
+                Curated drops updated weekly. Minimal silhouettes, quality
+                fabrics, lasting wear.
+              </p>
+
+              <div className="mt-7 flex flex-col sm:flex-row flex-wrap gap-2.5">
+                <Link
+                  to="/shop?sort=newest"
+                  className="
+                    group inline-flex items-center justify-center gap-2
+                    bg-stone-900 text-white text-[11px] tracking-[0.18em] uppercase font-medium
+                    px-6 py-3
+                    hover:bg-stone-700 hover:scale-[1.02] hover:shadow-lg
+                    transition-all duration-200
+                  "
+                >
+                  Shop the Drop
+                  <ArrowRight
+                    size={12}
+                    className="transition-transform duration-200 group-hover:translate-x-0.5"
+                  />
+                </Link>
+
+                <a
+                  href={STORE_CONFIG.instagram.profileUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="
+                    group inline-flex items-center justify-center gap-2
+                    border border-stone-400 text-stone-700 text-[11px] tracking-[0.18em] uppercase font-medium
+                    px-6 py-3
+                    hover:border-stone-700 hover:text-stone-900 hover:scale-[1.02]
+                    transition-all duration-200
+                  "
+                >
+                  Instagram
+                  <ArrowRight
+                    size={12}
+                    className="transition-transform duration-200 group-hover:translate-x-0.5"
+                  />
+                </a>
+
+                <Link
+                  to="/ai-stylist"
+                  className="
+                    inline-flex items-center justify-center gap-1.5
+                    text-stone-500 text-[11px] tracking-[0.18em] uppercase
+                    border-b border-stone-300 pb-px
+                    hover:text-stone-800 hover:border-stone-600
+                    transition-all duration-200
+                  "
+                >
+                  Try AI Stylist
+                </Link>
+              </div>
+
+              <p className="mt-8 text-[10px] tracking-widest uppercase text-stone-400">
+                Free shipping on orders over ₹999
+              </p>
+            </div>
+
+            {/* ── RIGHT: 2 Product Cards ── */}
+            <div className="grid grid-cols-2 gap-3 md:gap-4">
+              {heroCards.map((card) => {
+                const currentIndex = activeSlideMap[card.id] || 0;
+                const currentSlide = card.slides[currentIndex];
+
+                return (
+                  <Link
+                    key={card.id}
+                    to={currentSlide.to}
+                    className="group relative overflow-hidden aspect-[3/4] bg-stone-200"
+                  >
+                    <ImageWithFallback
+                      src={currentSlide.image}
+                      alt={card.heading}
+                      className="
+                        absolute inset-0 w-full h-full object-cover
+                        group-hover:scale-[1.04]
+                        transition-transform duration-500 ease-out
+                      "
+                    />
+
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
+
+                    <div
+                      className="
+                      absolute top-2.5 right-2.5
+                      w-6 h-6 rounded-full bg-white/80 backdrop-blur-sm
+                      flex items-center justify-center
+                      opacity-0 group-hover:opacity-100
+                      transition-opacity duration-300
+                    "
+                    >
+                      <Play size={10} className="text-stone-800 ml-px" />
+                    </div>
+
+                    <div className="absolute bottom-0 left-0 right-0 px-3 pb-3">
+                      <h3 className="text-white text-[10px] tracking-[0.15em] uppercase font-medium truncate">
+                        {card.heading}
+                      </h3>
+                      <p className="text-white/55 text-[9px] mt-0.5 tracking-wider uppercase truncate">
+                        {card.subheading}
+                      </p>
+                      <div className="flex gap-1 mt-2">
+                        {card.slides.map((_, index) => (
+                          <span
+                            key={index}
+                            className={`block h-px rounded-full transition-all duration-300 ${
+                              index === currentIndex
+                                ? "w-4 bg-white"
+                                : "w-1.5 bg-white/35"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
         </div>
-        <div className="container mx-auto px-4 h-full flex items-center relative z-10">
-          <div className="max-w-2xl">
-            <h1 className="text-6xl font-serif text-amber-900 mb-6">
-              Timeless Fashion,
-              <br />
-              Modern Style
-            </h1>
-            <p className="text-xl text-amber-800 mb-8">
-              Discover curated vintage pieces that tell a story. Each garment is
-              hand-selected for its quality and character.
-            </p>
+      </section>
+
+      {/* ── CUSTOMER PRAISE ── */}
+      {reviewCard && reviewSlide && (
+        <section className="bg-[#f5f0e8] px-6 md:px-10 lg:px-16 py-10 md:py-12">
+          <div className="max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-[0.9fr_1.1fr] gap-6 md:gap-10 items-center">
+            <Link
+              to={reviewSlide.to}
+              className="group relative overflow-hidden aspect-[4/5] md:aspect-[3/4] bg-stone-200 max-w-[360px]"
+            >
+              <ImageWithFallback
+                src={reviewSlide.image}
+                alt={reviewCard.heading}
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500 ease-out"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
+              <div className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <Play size={10} className="text-stone-800 ml-px" />
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 px-3 pb-3">
+                <h3 className="text-white text-[10px] tracking-[0.15em] uppercase font-medium truncate">
+                  {reviewCard.heading}
+                </h3>
+                <p className="text-white/55 text-[9px] mt-0.5 tracking-wider uppercase truncate">
+                  {reviewCard.subheading}
+                </p>
+              </div>
+            </Link>
+
+            <div>
+              <p className="text-[10px] tracking-[0.3em] uppercase text-stone-400 mb-3">
+                Customer Voice
+              </p>
+              <h3 className="font-serif text-stone-900 text-2xl md:text-3xl leading-tight">
+                Loved by customers who wear DriPort every day.
+              </h3>
+              <div className="mt-4 w-12 h-px bg-stone-300" />
+              <p className="mt-4 text-stone-600 text-sm md:text-base leading-relaxed max-w-2xl">
+                From fabric quality to fit and delivery, our community
+                highlights the same thing: DriPort pieces feel premium,
+                wearable, and reliable. Real reviews and repeat customers are
+                what keep each new drop moving.
+              </p>
+              <p className="mt-4 text-stone-500 text-xs tracking-[0.14em] uppercase">
+                "Best quality for the price. Every order feels worth it."
+              </p>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── CATEGORY FINDER ── */}
+      <section className="bg-white py-16 md:py-20 px-6 md:px-10 lg:px-16">
+        <div className="max-w-[1400px] mx-auto">
+          <div className="flex items-end justify-between mb-8">
+            <div>
+              <p className="text-[10px] tracking-[0.3em] uppercase text-stone-400 mb-1.5">
+                Browse
+              </p>
+              <h2 className="font-serif text-stone-900 text-2xl md:text-3xl">
+                What are you looking for?
+              </h2>
+            </div>
             <Link
               to="/shop"
-              className="inline-flex items-center gap-2 bg-amber-900 text-amber-50 px-8 py-4 rounded hover:bg-amber-800 transition text-lg"
+              className="hidden md:inline-flex items-center gap-1.5 text-[10px] tracking-[0.15em] uppercase text-stone-400 border-b border-stone-300 pb-px hover:text-stone-700 hover:border-stone-600 transition-all duration-200"
             >
-              Shop Collection
-              <ArrowRight size={20} />
+              All categories <ArrowRight size={11} />
             </Link>
           </div>
-        </div>
-      </section>
 
-      {/* Features */}
-      <section className="py-16 bg-white border-y-2 border-amber-900/20">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-100 text-amber-900 mb-4">
-                <Truck size={24} />
-              </div>
-              <h3 className="font-semibold text-amber-900 mb-2">
-                Free Shipping
-              </h3>
-              <p className="text-sm text-amber-800">On orders over ₹800</p>
-            </div>
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-100 text-amber-900 mb-4">
-                <RefreshCw size={24} />
-              </div>
-              <h3 className="font-semibold text-amber-900 mb-2">
-                Easy Returns
-              </h3>
-              <p className="text-sm text-amber-800">30-day return policy</p>
-            </div>
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-100 text-amber-900 mb-4">
-                <Shield size={24} />
-              </div>
-              <h3 className="font-semibold text-amber-900 mb-2">
-                Authentic Items
-              </h3>
-              <p className="text-sm text-amber-800">100% genuine vintage</p>
-            </div>
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-100 text-amber-900 mb-4">
-                <Star size={24} />
-              </div>
-              <h3 className="font-semibold text-amber-900 mb-2">
-                Quality Assured
-              </h3>
-              <p className="text-sm text-amber-800">Hand-picked with care</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Products */}
-      <section className="py-20 bg-amber-50/30">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-serif text-amber-900 mb-4">
-              Featured Pieces
-            </h2>
-            <p className="text-amber-800">Our most loved vintage finds</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredProducts.map((product) => (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
+            {STORE_CONFIG.categoryCards.map((card) => (
               <Link
-                key={product.id}
-                to={`/product/${product.id}`}
-                className="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border-2 border-amber-900/10"
+                key={card.id}
+                to={card.to}
+                className="group relative overflow-hidden aspect-[3/4] bg-stone-100"
               >
-                <div className="aspect-[3/4] overflow-hidden">
-                  <ImageWithFallback
-                    src={`${BASE_URL}${product.image}`}
-                    alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                </div>
-                <div className="p-4">
-                  <div className="text-xs text-amber-700 mb-1">
-                    {product.category}
-                  </div>
-                  <h3 className="font-semibold text-amber-900 mb-2">
-                    {product.name}
-                  </h3>
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-serif text-amber-900">
-                      ₹{product.price}
-                    </span>
-                    <div className="flex gap-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          size={12}
-                          className="fill-amber-400 text-amber-400"
-                        />
-                      ))}
-                    </div>
-                  </div>
+                <ImageWithFallback
+                  src={card.image}
+                  alt={card.label}
+                  className="
+                    absolute inset-0 w-full h-full object-cover
+                    group-hover:scale-[1.04]
+                    transition-transform duration-500 ease-out
+                  "
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 px-3 pb-3.5">
+                  <p className="text-white text-[10px] tracking-[0.18em] uppercase font-medium">
+                    {card.label}
+                  </p>
+                  <div className="mt-1.5 w-0 group-hover:w-full h-px bg-white/50 transition-all duration-300 ease-out" />
                 </div>
               </Link>
             ))}
-          </div>
-          <div className="text-center mt-12">
-            <Link
-              to="/shop"
-              className="inline-flex items-center gap-2 border-2 border-amber-900 text-amber-900 px-8 py-3 rounded hover:bg-amber-900 hover:text-amber-50 transition"
-            >
-              View All Products
-              <ArrowRight size={18} />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Collections Banner */}
-      <section className="py-20 bg-gradient-to-r from-amber-900 to-amber-800 text-amber-50">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl font-serif mb-4">New Collection Available</h2>
-          <p className="text-xl text-amber-100 mb-8">
-            Explore our latest arrivals from the golden age of fashion
-          </p>
-          <Link
-            to="/collections"
-            className="inline-flex items-center gap-2 bg-amber-50 text-amber-900 px-8 py-4 rounded hover:bg-white transition text-lg"
-          >
-            Browse Collections
-            <ArrowRight size={20} />
-          </Link>
-        </div>
-      </section>
-
-      {/* Story Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-4xl font-serif text-amber-900 mb-6">
-                Our Story
-              </h2>
-              <p className="text-amber-800 mb-4">
-                Founded in 2015, Vintage Vogue has been dedicated to preserving
-                the artistry and craftsmanship of fashion's most iconic eras. We
-                believe that true style is timeless.
-              </p>
-              <p className="text-amber-800 mb-6">
-                Each piece in our collection is carefully curated,
-                authenticated, and restored to its original glory. We're not
-                just selling clothes – we're sharing history.
-              </p>
-              <Link
-                to="/about"
-                className="inline-flex items-center gap-2 text-amber-900 font-semibold hover:text-amber-700 transition"
-              >
-                Read More About Us
-                <ArrowRight size={18} />
-              </Link>
-            </div>
-            <div className="rounded-lg overflow-hidden shadow-xl">
-              <ImageWithFallback
-                src="https://images.unsplash.com/photo-1764627511567-af015c644c24?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyZXRybyUyMGZhc2hpb24lMjBtb2RlbCUyMHN0eWxlfGVufDF8fHx8MTc3MDY0OTcwM3ww&ixlib=rb-4.1.0&q=80&w=1080"
-                alt="Our Story"
-                className="w-full h-full object-cover"
-              />
-            </div>
           </div>
         </div>
       </section>

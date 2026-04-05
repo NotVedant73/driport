@@ -29,10 +29,12 @@ export default function AdminLayout() {
 
   return (
     <div className="bg-amber-50/30 min-h-screen">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-6">
+      <div className="container mx-auto px-4 py-6 sm:py-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-4xl font-serif text-amber-900">Admin Panel</h1>
+            <h1 className="text-3xl sm:text-4xl font-serif text-amber-900">
+              Admin Panel
+            </h1>
             <p className="text-amber-800">
               Manage products, orders and promotions
             </p>

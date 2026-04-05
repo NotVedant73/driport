@@ -1,5 +1,6 @@
 import { Mail, Phone, MapPin, Clock } from "lucide-react";
 import apiClient from "../../api/apiClient";
+import { CONTACT_PAGE_CONTENT } from "../../config";
 import {
   Form,
   useActionData,
@@ -15,6 +16,12 @@ export default function Contact() {
   const navigation = useNavigation();
   const submit = useSubmit();
   const isSubmitting = navigation.state === "submitting";
+  const iconMap = {
+    mail: Mail,
+    phone: Phone,
+    mapPin: MapPin,
+    clock: Clock,
+  };
 
   useEffect(() => {
     if (actionData?.success) {
@@ -38,16 +45,15 @@ export default function Contact() {
   };
 
   return (
-    <div className="bg-amber-50/30">
+    <div className="bg-[#f5f0e8]">
       {/* Hero */}
-      <div className="bg-gradient-to-r from-amber-100 to-amber-50 py-20 border-b-2 border-amber-900/20">
+      <div className="bg-gradient-to-r from-[#f0e7d8] to-[#f7f1e8] py-20 border-b-2 border-stone-300">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-6xl font-serif text-amber-900 mb-6">
-            Get in Touch
+          <h1 className="text-6xl font-serif text-stone-900 mb-6">
+            {CONTACT_PAGE_CONTENT.hero.title}
           </h1>
-          <p className="text-xl text-amber-800 max-w-2xl mx-auto">
-            We'd love to hear from you. Send us a message and we'll respond as
-            soon as possible.
+          <p className="text-xl text-stone-600 max-w-2xl mx-auto">
+            {CONTACT_PAGE_CONTENT.hero.subtitle}
           </p>
         </div>
       </div>
@@ -56,70 +62,37 @@ export default function Contact() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Contact Info */}
           <div className="space-y-6">
-            <div className="bg-white rounded-lg p-6 border-2 border-amber-900/10">
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-900">
-                  <Mail size={24} />
+            {CONTACT_PAGE_CONTENT.contactCards.map((card, index) => {
+              const CardIcon = iconMap[card.icon] ?? Mail;
+              return (
+                <div
+                  key={index}
+                  className="bg-white rounded-lg p-6 border-2 border-stone-200"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0 w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center text-stone-900">
+                      <CardIcon size={24} />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-stone-900 mb-2">
+                        {card.title}
+                      </h3>
+                      {card.lines.map((line, lineIndex) => (
+                        <p key={lineIndex} className="text-stone-600">
+                          {line}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-amber-900 mb-2">
-                    Email Us
-                  </h3>
-                  <p className="text-amber-800">info@vintagevogue.com</p>
-                  <p className="text-amber-800">support@vintagevogue.com</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg p-6 border-2 border-amber-900/10">
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-900">
-                  <Phone size={24} />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-amber-900 mb-2">Call Us</h3>
-                  <p className="text-amber-800">+1 (555) 123-4567</p>
-                  <p className="text-amber-800">Mon-Fri, 9am-6pm EST</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg p-6 border-2 border-amber-900/10">
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-900">
-                  <MapPin size={24} />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-amber-900 mb-2">
-                    Visit Us
-                  </h3>
-                  <p className="text-amber-800">123 Vintage Lane</p>
-                  <p className="text-amber-800">Brooklyn, NY 11201</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg p-6 border-2 border-amber-900/10">
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-900">
-                  <Clock size={24} />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-amber-900 mb-2">
-                    Store Hours
-                  </h3>
-                  <p className="text-amber-800">Monday - Friday: 10am - 7pm</p>
-                  <p className="text-amber-800">Saturday: 11am - 6pm</p>
-                  <p className="text-amber-800">Sunday: 12pm - 5pm</p>
-                </div>
-              </div>
-            </div>
+              );
+            })}
           </div>
 
           {/* Contact Form */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg p-8 border-2 border-amber-900/10">
-              <h2 className="text-3xl font-serif text-amber-900 mb-6">
+            <div className="bg-white rounded-lg p-8 border-2 border-stone-200">
+              <h2 className="text-3xl font-serif text-stone-900 mb-6">
                 Send us a Message
               </h2>
               <Form
@@ -132,7 +105,7 @@ export default function Contact() {
                   <div>
                     <label
                       htmlFor="firstName"
-                      className="block text-amber-900 font-semibold mb-2"
+                      className="block text-stone-900 font-semibold mb-2"
                     >
                       First Name *
                     </label>
@@ -140,7 +113,7 @@ export default function Contact() {
                       id="firstName"
                       name="firstName"
                       type="text"
-                      className="w-full px-4 py-3 border-2 border-amber-900/20 rounded focus:outline-none focus:border-amber-900"
+                      className="w-full px-4 py-3 border-2 border-stone-300 rounded focus:outline-none focus:border-amber-300"
                       placeholder="John"
                       required
                       minLength={5}
@@ -150,7 +123,7 @@ export default function Contact() {
                   <div>
                     <label
                       htmlFor="lastName"
-                      className="block text-amber-900 font-semibold mb-2"
+                      className="block text-stone-900 font-semibold mb-2"
                     >
                       Last Name *
                     </label>
@@ -158,7 +131,7 @@ export default function Contact() {
                       id="lastName"
                       name="lastName"
                       type="text"
-                      className="w-full px-4 py-3 border-2 border-amber-900/20 rounded focus:outline-none focus:border-amber-900"
+                      className="w-full px-4 py-3 border-2 border-stone-300 rounded focus:outline-none focus:border-amber-300"
                       placeholder="John"
                       required
                       minLength={5}
@@ -170,7 +143,7 @@ export default function Contact() {
                 <div>
                   <label
                     htmlFor="email"
-                    className="block text-amber-900 font-semibold mb-2"
+                    className="block text-stone-900 font-semibold mb-2"
                   >
                     Email Address *
                   </label>
@@ -178,7 +151,7 @@ export default function Contact() {
                     id="email"
                     name="email"
                     type="email"
-                    className="w-full px-4 py-3 border-2 border-amber-900/20 rounded focus:outline-none focus:border-amber-900"
+                    className="w-full px-4 py-3 border-2 border-stone-300 rounded focus:outline-none focus:border-amber-300"
                     placeholder="john@example.com"
                     required
                   />
@@ -187,7 +160,7 @@ export default function Contact() {
                 <div>
                   <label
                     htmlFor="phone"
-                    className="block text-amber-900 font-semibold mb-2"
+                    className="block text-stone-900 font-semibold mb-2"
                   >
                     Phone Number
                   </label>
@@ -196,7 +169,7 @@ export default function Contact() {
                     name="phone"
                     type="tel"
                     pattern="[0-9]{10}"
-                    className="w-full px-4 py-3 border-2 border-amber-900/20 rounded focus:outline-none focus:border-amber-900"
+                    className="w-full px-4 py-3 border-2 border-stone-300 rounded focus:outline-none focus:border-amber-300"
                     placeholder="+1 (555) 123-4567"
                     required
                   />
@@ -205,13 +178,13 @@ export default function Contact() {
                 <div>
                   <label
                     htmlFor="subject"
-                    className="block text-amber-900 font-semibold mb-2"
+                    className="block text-stone-900 font-semibold mb-2"
                   >
                     Subject *
                   </label>
                   <select
                     name="subject"
-                    className="w-full px-4 py-3 border-2 border-amber-900/20 rounded focus:outline-none focus:border-amber-900"
+                    className="w-full px-4 py-3 border-2 border-stone-300 rounded focus:outline-none focus:border-amber-300"
                   >
                     <option value="GENERAL_INQUIRY">General Inquiry</option>
                     <option value="ORDER_STATUS">Order Status</option>
@@ -226,7 +199,7 @@ export default function Contact() {
                 <div>
                   <label
                     htmlFor="message"
-                    className="block text-amber-900 font-semibold mb-2"
+                    className="block text-stone-900 font-semibold mb-2"
                   >
                     Message *
                   </label>
@@ -234,7 +207,7 @@ export default function Contact() {
                     id="message"
                     name="message"
                     rows="6"
-                    className="w-full px-4 py-3 border-2 border-amber-900/20 rounded focus:outline-none focus:border-amber-900"
+                    className="w-full px-4 py-3 border-2 border-stone-300 rounded focus:outline-none focus:border-amber-300"
                     placeholder="Tell us how we can help you..."
                     required
                   ></textarea>
@@ -243,7 +216,7 @@ export default function Contact() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-amber-900 text-amber-50 py-4 rounded hover:bg-amber-800 transition text-lg font-semibold"
+                  className="w-full bg-stone-900 text-white py-4 rounded hover:bg-stone-700 transition text-lg font-semibold"
                 >
                   {isSubmitting ? "Submitting..." : "Send Message"}
                 </button>
@@ -254,40 +227,19 @@ export default function Contact() {
 
         {/* FAQ Section */}
         <div className="mt-20">
-          <h2 className="text-4xl font-serif text-amber-900 text-center mb-12">
+          <h2 className="text-4xl font-serif text-stone-900 text-center mb-12">
             Frequently Asked Questions
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[
-              {
-                question: "How do I know if an item will fit?",
-                answer:
-                  "We provide detailed measurements for each item. Check our size guide and compare with your measurements.",
-              },
-              {
-                question: "What is your return policy?",
-                answer:
-                  "We offer a 30-day return policy on all items. Items must be in original condition with tags attached.",
-              },
-              {
-                question: "Are your items authentic vintage?",
-                answer:
-                  "Yes! Every piece is carefully authenticated and sourced from reputable vintage suppliers.",
-              },
-              {
-                question: "How long does shipping take?",
-                answer:
-                  "Domestic orders typically arrive within 3-5 business days. International shipping varies by location.",
-              },
-            ].map((faq, index) => (
+            {CONTACT_PAGE_CONTENT.faq.map((faq, index) => (
               <div
                 key={index}
-                className="bg-white rounded-lg p-6 border-2 border-amber-900/10"
+                className="bg-white rounded-lg p-6 border-2 border-stone-200"
               >
-                <h3 className="font-semibold text-amber-900 text-lg mb-3">
+                <h3 className="font-semibold text-stone-900 text-lg mb-3">
                   {faq.question}
                 </h3>
-                <p className="text-amber-800">{faq.answer}</p>
+                <p className="text-stone-600">{faq.answer}</p>
               </div>
             ))}
           </div>

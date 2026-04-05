@@ -38,17 +38,17 @@ export default function Checkout() {
 
   if (items.length === 0) {
     return (
-      <div className="bg-amber-50/30 min-h-screen flex items-center justify-center">
-        <div className="bg-white rounded-lg p-8 border-2 border-amber-900/10 text-center">
-          <h1 className="text-3xl font-serif text-amber-900 mb-4">
+      <div className="bg-[#f5f0e8] min-h-screen flex items-center justify-center">
+        <div className="bg-white rounded-lg p-8 border-2 border-stone-200 text-center">
+          <h1 className="text-3xl font-serif text-stone-900 mb-4">
             Your cart is empty
           </h1>
-          <p className="text-amber-800 mb-6">
+          <p className="text-stone-600 mb-6">
             Add some items to your cart before checking out.
           </p>
           <Link
             to="/shop"
-            className="bg-amber-900 text-amber-50 px-6 py-3 rounded hover:bg-amber-800 transition"
+            className="bg-stone-900 text-white px-6 py-3 rounded hover:bg-stone-700 transition"
           >
             Go to Shop
           </Link>
@@ -188,19 +188,19 @@ export default function Checkout() {
   };
 
   return (
-    <div className="bg-amber-50/30 min-h-screen">
-      <div className="container mx-auto px-4 py-12">
-        <h1 className="text-4xl font-serif text-amber-900 mb-8 text-center">
+    <div className="bg-[#f5f0e8] min-h-screen">
+      <div className="container mx-auto px-4 py-8 sm:py-12">
+        <h1 className="text-3xl sm:text-4xl font-serif text-stone-900 mb-8 text-center">
           Checkout
         </h1>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <form
             onSubmit={handleSubmit}
-            className="bg-white rounded-lg p-8 border-2 border-amber-900/10 lg:col-span-2 space-y-4"
+            className="bg-white rounded-lg p-5 sm:p-8 border-2 border-stone-200 lg:col-span-2 space-y-4"
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-amber-900 mb-1">
+                <label className="block text-sm font-semibold text-stone-900 mb-1">
                   Full Name
                 </label>
                 <input
@@ -209,11 +209,11 @@ export default function Checkout() {
                   value={form.customerName}
                   onChange={handleChange}
                   required
-                  className="w-full px-3 py-2 border-2 border-amber-900/20 rounded focus:outline-none focus:border-amber-900"
+                  className="w-full px-3 py-2 border-2 border-stone-300 rounded focus:outline-none focus:border-amber-300"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-amber-900 mb-1">
+                <label className="block text-sm font-semibold text-stone-900 mb-1">
                   Email
                 </label>
                 <input
@@ -222,13 +222,13 @@ export default function Checkout() {
                   value={form.customerEmail}
                   onChange={handleChange}
                   required
-                  className="w-full px-3 py-2 border-2 border-amber-900/20 rounded focus:outline-none focus:border-amber-900"
+                  className="w-full px-3 py-2 border-2 border-stone-300 rounded focus:outline-none focus:border-amber-300"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-amber-900 mb-1">
+              <label className="block text-sm font-semibold text-stone-900 mb-1">
                 Phone
               </label>
               <input
@@ -237,12 +237,12 @@ export default function Checkout() {
                 value={form.customerPhone}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border-2 border-amber-900/20 rounded focus:outline-none focus:border-amber-900"
+                className="w-full px-3 py-2 border-2 border-stone-300 rounded focus:outline-none focus:border-amber-300"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-amber-900 mb-1">
+              <label className="block text-sm font-semibold text-stone-900 mb-1">
                 Shipping Address
               </label>
               <textarea
@@ -251,12 +251,12 @@ export default function Checkout() {
                 onChange={handleChange}
                 required
                 rows={4}
-                className="w-full px-3 py-2 border-2 border-amber-900/20 rounded focus:outline-none focus:border-amber-900"
+                className="w-full px-3 py-2 border-2 border-stone-300 rounded focus:outline-none focus:border-amber-300"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-amber-900 mb-1">
+              <label className="block text-sm font-semibold text-stone-900 mb-1">
                 Notes (optional)
               </label>
               <textarea
@@ -264,7 +264,7 @@ export default function Checkout() {
                 value={form.notes}
                 onChange={handleChange}
                 rows={3}
-                className="w-full px-3 py-2 border-2 border-amber-900/20 rounded focus:outline-none focus:border-amber-900"
+                className="w-full px-3 py-2 border-2 border-stone-300 rounded focus:outline-none focus:border-amber-300"
               />
             </div>
 
@@ -273,23 +273,23 @@ export default function Checkout() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-amber-900 text-amber-50 py-4 rounded hover:bg-amber-800 transition text-lg font-semibold disabled:opacity-60"
+              className="w-full bg-stone-900 text-white py-4 rounded hover:bg-stone-700 transition text-lg font-semibold disabled:opacity-60"
             >
               {isSubmitting ? "Processing Payment..." : "Proceed to Payment"}
             </button>
           </form>
 
-          <div className="bg-white rounded-lg p-8 border-2 border-amber-900/10">
-            <h2 className="text-2xl font-serif text-amber-900 mb-6">
+          <div className="bg-white rounded-lg p-5 sm:p-8 border-2 border-stone-200">
+            <h2 className="text-2xl font-serif text-stone-900 mb-6">
               Order Summary
             </h2>
             <ul className="space-y-3 mb-6">
               {items.map((item) => (
                 <li
                   key={item.productId}
-                  className="flex justify-between text-amber-800"
+                  className="flex justify-between text-stone-600"
                 >
-                  <span>
+                  <span className="pr-3 break-words">
                     {item.name} × {item.quantity}
                   </span>
                   <span>
@@ -298,8 +298,8 @@ export default function Checkout() {
                 </li>
               ))}
             </ul>
-            <div className="border-t-2 border-amber-900/10 pt-4 space-y-2">
-              <div className="flex justify-between text-amber-800">
+            <div className="border-t-2 border-stone-200 pt-4 space-y-2">
+              <div className="flex justify-between text-stone-600">
                 <span>Subtotal</span>
                 <span>₹{subtotal.toFixed(2)}</span>
               </div>

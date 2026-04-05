@@ -39,6 +39,7 @@ public class SecurityConfig {
                         // Public endpoints
                         .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/contact").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/contacts").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
 
                         // Protected endpoints - require authentication
