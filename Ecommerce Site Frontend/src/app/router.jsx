@@ -27,9 +27,10 @@ import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AppRouteError from "./components/AppRouteError";
 
 const routeDefinitions = createRoutesFromElements(
-  <Route path="/" element={<App />}>
+  <Route path="/" element={<App />} errorElement={<AppRouteError />}>
     <Route index element={<Home />} loader={homeLoader} />
     <Route path="/shop" element={<Shop />} />
     <Route

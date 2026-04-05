@@ -162,10 +162,17 @@ export default function Cart() {
                       placeholder="Enter code"
                       className="flex-1 px-3 py-2 border-2 border-stone-300 rounded focus:outline-none focus:border-amber-300"
                     />
-                    <button className="px-6 py-2 border-2 border-amber-900 text-stone-900 rounded hover:bg-stone-100 hover:text-amber-50 transition">
+                    <button
+                      disabled
+                      title="Coupon apply endpoint is not enabled in this release"
+                      className="px-6 py-2 border-2 border-amber-900 text-stone-900 rounded opacity-60 cursor-not-allowed"
+                    >
                       Apply
                     </button>
                   </div>
+                  <p className="mt-2 text-xs text-stone-500">
+                    Coupon apply is temporarily disabled in this deployment.
+                  </p>
                 </div>
               </div>
             </div>

@@ -22,6 +22,28 @@ export default function AdminShipments() {
     estimatedDeliveryDate: "",
   });
 
+  const getErrorText = (error, fallback) => {
+    const payload = error?.response?.data;
+    if (typeof payload === "string" && payload.trim()) return payload;
+    if (payload?.message) return payload.message;
+    return fallback;
+  };
+
+  const getWithRetry = async (path, attempts = 2) => {
+    let lastError;
+    for (let i = 0; i < attempts; i += 1) {
+      try {
+        return await apiClient.get(path);
+      } catch (error) {
+        lastError = error;
+        if (i < attempts - 1) {
+          await new Promise((resolve) => setTimeout(resolve, 1500));
+        }
+      }
+    }
+    throw lastError;
+  };
+
   const selected = useMemo(
     () =>
       shipments.find(
@@ -31,15 +53,35 @@ export default function AdminShipments() {
   );
 
   const load = async () => {
-    const [shipmentsRes, lowStockRes] = await Promise.all([
-      apiClient.get("/admin/shipments"),
-      apiClient.get("/admin/shipments/low-stock"),
+    const [shipmentsResult, lowStockResult] = await Promise.allSettled([
+      getWithRetry("/admin/shipments"),
+      getWithRetry("/admin/shipments/low-stock"),
     ]);
-    setShipments(shipmentsRes.data || []);
-    setLowStock(lowStockRes.data || []);
 
-    if (!selectedShipmentId && shipmentsRes.data?.length) {
-      setSelectedShipmentId(shipmentsRes.data[0].shipmentId);
+    if (shipmentsResult.status === "fulfilled") {
+      setShipments(shipmentsResult.value.data || []);
+    } else {
+      setShipments([]);
+      toast.error(
+        getErrorText(shipmentsResult.reason, "Failed to load shipments"),
+      );
+    }
+
+    if (lowStockResult.status === "fulfilled") {
+      setLowStock(lowStockResult.value.data || []);
+    } else {
+      setLowStock([]);
+      toast.error(
+        getErrorText(lowStockResult.reason, "Failed to load low stock data"),
+      );
+    }
+
+    if (
+      !selectedShipmentId &&
+      shipmentsResult.status === "fulfilled" &&
+      shipmentsResult.value.data?.length
+    ) {
+      setSelectedShipmentId(shipmentsResult.value.data[0].shipmentId);
     }
   };
 
@@ -65,7 +107,7 @@ export default function AdminShipments() {
       });
       await load();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to create shipment");
+      toast.error(getErrorText(error, "Failed to create shipment"));
     }
   };
 
@@ -80,9 +122,7 @@ export default function AdminShipments() {
       await load();
       setSelectedShipmentId(shipmentId);
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Failed to update shipment status",
-      );
+      toast.error(getErrorText(error, "Failed to update shipment status"));
     }
   };
 

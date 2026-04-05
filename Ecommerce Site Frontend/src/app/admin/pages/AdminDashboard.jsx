@@ -6,12 +6,25 @@ export default function AdminDashboard() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    const extractError = (e) => {
+      const payload = e?.response?.data;
+      if (typeof payload === "string" && payload.trim()) return payload;
+      if (payload?.message) return payload.message;
+      return "Failed to load analytics.";
+    };
+
     (async () => {
       try {
-        const res = await apiClient.get("/admin/analytics/summary");
+        let res;
+        try {
+          res = await apiClient.get("/admin/analytics/summary");
+        } catch (firstError) {
+          await new Promise((resolve) => setTimeout(resolve, 1500));
+          res = await apiClient.get("/admin/analytics/summary");
+        }
         setSummary(res.data);
       } catch (e) {
-        setError(e.response?.data || "Failed to load analytics.");
+        setError(extractError(e));
       }
     })();
   }, []);
